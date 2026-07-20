@@ -1,0 +1,41 @@
+# Environment
+backend/.env
+backend/.env.backup
+backend/.env.production
+
+# Dependencies
+backend/vendor/
+backend/node_modules/
+
+# Laravel runtime/cache
+backend/bootstrap/cache/*.php
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/testing/*
+backend/storage/framework/views/*
+backend/storage/logs/*.log
+backend/storage/app/private/*
+backend/storage/app/public/*
+!backend/storage/framework/cache/data/.gitkeep
+!backend/storage/framework/sessions/.gitkeep
+!backend/storage/framework/testing/.gitkeep
+!backend/storage/framework/views/.gitkeep
+!backend/storage/logs/.gitkeep
+
+# Build output
+backend/public/build/
+backend/public/hot
+backend/public/storage
+
+# Testing
+backend/.phpunit.cache/
+backend/.phpunit.result.cache
+
+# IDE / OS
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+
+# Docker volumes (if run locally)
+docker/mysql-data/

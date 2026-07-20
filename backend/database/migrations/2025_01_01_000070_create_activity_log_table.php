@@ -1,0 +1,37 @@
+<?php
+// Standard spatie/laravel-activitylog migration stub, adapted for UUID
+// subject/causer models (subject_id / causer_id as string to support both
+// UUID tenant models and any future integer-keyed platform tables).
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('activity_log', function (Blueprint $table) {
+            $table->id();
+            $table->string('log_name')->nullable();
+            $table->text('description');
+            $table->string('subject_type')->nullable();
+            $table->string('subject_id')->nullable();
+            $table->string('event')->nullable();
+            $table->string('causer_type')->nullable();
+            $table->string('causer_id')->nullable();
+            $table->json('properties')->nullable();
+            $table->uuid('batch_uuid')->nullable();
+            $table->timestamps();
+
+            $table->index('log_name');
+            $table->index(['subject_type', 'subject_id']);
+            $table->index(['causer_type', 'causer_id']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('activity_log');
+    }
+};
