@@ -51,8 +51,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('superseded_by_id')->references('id')->on('government_land_rates')->nullOnDelete();
-            $table->index(['district_id', 'fiscal_year_id', 'is_current']);
-            $table->index(['local_level_id', 'ward_id', 'fiscal_year_id']);
+            $table->index(['district_id', 'fiscal_year_id', 'is_current'], 'govt_rates_district_fy_current_idx');
+            $table->index(['local_level_id', 'ward_id', 'fiscal_year_id'], 'govt_rates_locallevel_ward_fy_idx');
         });
     }
 

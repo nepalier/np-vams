@@ -44,7 +44,7 @@ return new class extends Migration
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('superseded_by_id')->references('id')->on('construction_rates')->nullOnDelete();
-            $table->index(['tenant_id', 'structural_type', 'fiscal_year_id', 'is_current']);
+            $table->index(['tenant_id', 'structural_type', 'fiscal_year_id', 'is_current'], 'construction_rates_lookup_idx');
         });
 
         // Economic-life reference table (Section 26/23): remaining_life =

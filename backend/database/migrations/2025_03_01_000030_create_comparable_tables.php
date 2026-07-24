@@ -41,7 +41,7 @@ return new class extends Migration
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->index(['latitude', 'longitude']);
-            $table->index(['tenant_id', 'district_id', 'reliability_grade']);
+            $table->index(['tenant_id', 'district_id', 'reliability_grade'], 'comparable_props_tenant_district_grade_idx');
         });
 
         // Adjustment factors actually APPLIED to a given comparable within
