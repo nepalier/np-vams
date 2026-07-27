@@ -120,21 +120,43 @@ class ReportWorkflowService
         });
     }
 
-    public function cancel(Report $report, string $reason): Report
+    public function cancel(Report $report, ValuationAssignment $assignment, User $user, string $reason): Report
     {
-        $report->forceFill(['status' => 'cancelled'])->save();
+        if ($report->status !== 'issued') {
+            throw new RuntimeException('Only an issued report can be cancelled.');
+        }
 
-        $report->qrVerification()->update(['status' => 'cancelled']);
+        return DB::transaction(function () use ($report, $assignment, $user, $reason) {
+            $report->forceFill(['status' => 'cancelled'])->save();
+            $report->qrVerification()->update(['status' => 'cancelled']);
 
-        return $report;
+            $this->workflowEngine->transition($assignment, 'cancelled', $user, $reason);
+
+            return $report->fresh();
+        });
     }
 
-    public function supersede(Report $report, string $reason): Report
+    /**
+     * A superseded report is replaced by a NEW assignment/report pair
+     * (e.g. a corrected revaluation) -- this method only marks the OLD
+     * report superseded and revokes its QR token; it does not create the
+     * replacement, which is a normal new assignment with
+     * is_revaluation=true and parent_assignment_id pointing back here
+     * (Section 6).
+     */
+    public function supersede(Report $report, ValuationAssignment $assignment, User $user, string $reason): Report
     {
-        $report->forceFill(['status' => 'superseded'])->save();
+        if ($report->status !== 'issued') {
+            throw new RuntimeException('Only an issued report can be superseded.');
+        }
 
-        $report->qrVerification()->update(['status' => 'superseded']);
+        return DB::transaction(function () use ($report, $assignment, $user, $reason) {
+            $report->forceFill(['status' => 'superseded'])->save();
+            $report->qrVerification()->update(['status' => 'superseded']);
 
-        return $report;
+            $this->workflowEngine->transition($assignment, 'superseded', $user, $reason);
+
+            return $report->fresh();
+        });
     }
 }

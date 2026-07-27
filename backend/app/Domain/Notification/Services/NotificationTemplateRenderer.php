@@ -37,6 +37,46 @@ class NotificationTemplateRenderer
                 'body' => 'असाइनमेन्ट {{assignment_number}} मा सुधार अनुरोध गरिएको छ। समीक्षकको टिप्पणी: {{remarks}}',
             ],
         ],
+        'valuer_assigned' => [
+            'en' => [
+                'subject' => 'New assignment for you — {{assignment_number}}',
+                'body' => 'You have been assigned as valuer on assignment {{assignment_number}}. Please review the case details and schedule a site visit.',
+            ],
+            'ne' => [
+                'subject' => 'तपाईंको लागि नयाँ असाइनमेन्ट — {{assignment_number}}',
+                'body' => 'तपाईंलाई असाइनमेन्ट {{assignment_number}} मा मूल्याङ्कक तोकिएको छ। कृपया विवरण समीक्षा गरी साइट भ्रमणको तालिका बनाउनुहोस्।',
+            ],
+        ],
+        'awaiting_approval' => [
+            'en' => [
+                'subject' => 'Awaiting your approval — {{assignment_number}}',
+                'body' => 'Assignment {{assignment_number}} has passed technical review and is awaiting your final approval.',
+            ],
+            'ne' => [
+                'subject' => 'तपाईंको स्वीकृतिको पर्खाइमा — {{assignment_number}}',
+                'body' => 'असाइनमेन्ट {{assignment_number}} प्राविधिक समीक्षा पास गरेर तपाईंको अन्तिम स्वीकृतिको पर्खाइमा छ।',
+            ],
+        ],
+        'approved' => [
+            'en' => [
+                'subject' => 'Your report has been approved — {{assignment_number}}',
+                'body' => 'Assignment {{assignment_number}} has been approved. It will proceed to digital signature and issuance.',
+            ],
+            'ne' => [
+                'subject' => 'तपाईंको प्रतिवेदन स्वीकृत भयो — {{assignment_number}}',
+                'body' => 'असाइनमेन्ट {{assignment_number}} स्वीकृत भएको छ। यो डिजिटल हस्ताक्षर र जारी गर्ने चरणमा जानेछ।',
+            ],
+        ],
+        'revaluation_due' => [
+            'en' => [
+                'subject' => 'Revaluation due — {{assignment_number}}',
+                'body' => 'The revaluation period for assignment {{assignment_number}} has been reached. Please initiate a new revaluation assignment if required.',
+            ],
+            'ne' => [
+                'subject' => 'पुनर्मूल्याङ्कन आवश्यक — {{assignment_number}}',
+                'body' => 'असाइनमेन्ट {{assignment_number}} को पुनर्मूल्याङ्कन अवधि पुगेको छ। आवश्यक भएमा कृपया नयाँ पुनर्मूल्याङ्कन असाइनमेन्ट सुरु गर्नुहोस्।',
+            ],
+        ],
     ];
 
     /**

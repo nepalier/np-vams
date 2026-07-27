@@ -45,6 +45,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/assignments/{assignment}/report/generate-draft', [ReportController::class, 'generateDraft']);
         Route::post('/assignments/{assignment}/report/sign', [ReportController::class, 'sign']);
         Route::post('/assignments/{assignment}/report/issue', [ReportController::class, 'issue']);
+        Route::post('/assignments/{assignment}/report/cancel', [ReportController::class, 'cancel']);
+        Route::post('/assignments/{assignment}/report/supersede', [ReportController::class, 'supersede']);
 
         Route::post('/invoices', [InvoiceController::class, 'store']);
         Route::post('/invoices/{invoice}/payments', [InvoiceController::class, 'recordPayment']);

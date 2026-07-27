@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Report\Http\Controllers;
 
 use App\Domain\Assignment\Models\ValuationAssignment;
+use App\Domain\Report\Http\Requests\CancelOrSupersedeReportRequest;
 use App\Domain\Report\Http\Requests\SignReportRequest;
 use App\Domain\Report\Http\Resources\ReportResource;
 use App\Domain\Report\Models\Report;
@@ -75,5 +76,31 @@ class ReportController
         return response()->json([
             'errors' => [['status' => '422', 'title' => 'ReportWorkflowError', 'detail' => $message]],
         ], 422);
+    }
+
+    public function cancel(CancelOrSupersedeReportRequest $request, ValuationAssignment $assignment): JsonResponse
+    {
+        $report = Report::where('valuation_assignment_id', $assignment->id)->firstOrFail();
+
+        try {
+            $report = $this->service->cancel($report, $assignment, $request->user(), $request->string('reason')->toString());
+        } catch (RuntimeException $e) {
+            return $this->error($e->getMessage());
+        }
+
+        return (new ReportResource($report))->response();
+    }
+
+    public function supersede(CancelOrSupersedeReportRequest $request, ValuationAssignment $assignment): JsonResponse
+    {
+        $report = Report::where('valuation_assignment_id', $assignment->id)->firstOrFail();
+
+        try {
+            $report = $this->service->supersede($report, $assignment, $request->user(), $request->string('reason')->toString());
+        } catch (RuntimeException $e) {
+            return $this->error($e->getMessage());
+        }
+
+        return (new ReportResource($report))->response();
     }
 }

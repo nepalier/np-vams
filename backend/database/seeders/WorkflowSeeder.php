@@ -71,6 +71,7 @@ class WorkflowSeeder extends Seeder
         ['payment_received', 'archived', null, false],
         ['archived', 'revaluation_due', null, false],
         ['report_issued', 'superseded', ['Approving Authority'], true],
+        ['report_issued', 'cancelled', ['Approving Authority'], true],
         // Cancellation permitted from any pre-issuance state:
         ['assignment_accepted', 'cancelled', null, true],
         ['documents_pending', 'cancelled', null, true],
