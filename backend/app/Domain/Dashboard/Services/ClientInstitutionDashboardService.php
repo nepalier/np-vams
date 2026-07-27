@@ -9,21 +9,14 @@ use App\Domain\Valuation\Models\ValuationReconciliation;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Section 37 "Client institution" dashboard, scoped to one client_id
- * within the CURRENT tenant.
+ * Section 37 "Client institution" dashboard, scoped to one client_id.
  *
- * KNOWN GAP, documented rather than silently worked around: Section 3
- * lists "Client Institution Administrator" / "Bank Branch User" as
- * portal-login roles, implying the bank's own staff log in and see only
- * their institution's cases. This schema's `clients`/`client_branches`
- * (Phase 3) are NOT User-linked -- they're the valuation firm's records
- * of its counterparties, and most clients never authenticate at all
- * (Phase 3 README). Giving a bank's own staff a real login that's scoped
- * to `client_id` instead of `organization_id` needs a second tenancy
- * axis on the User model (or a separate client-portal guard) that hasn't
- * been built. This service is written so a valuation firm's own staff can
- * pull up "how is Client X doing" today, and is the exact query shape a
- * future client-portal endpoint would reuse once that auth model exists.
+ * Called from two places: PortalController::dashboard() (a client-portal
+ * user viewing their own institution, client_id taken from the
+ * authenticated user) and DashboardController::clientInstitution() (a
+ * tenant staff member looking up a specific client by ID). Same query
+ * logic either way -- the access-control difference lives entirely in
+ * which controller/middleware fronts it, not in this service.
  */
 class ClientInstitutionDashboardService
 {

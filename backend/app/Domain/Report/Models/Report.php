@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Report\Models;
 
 use App\Support\Tenancy\BelongsToTenant;
+use App\Support\Tenancy\ScopedToClientPortal;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,10 +15,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Report extends Model
 {
-    use BelongsToTenant, HasUuids, LogsActivity;
+    use BelongsToTenant, HasUuids, LogsActivity, ScopedToClientPortal;
 
     protected $fillable = [
-        'tenant_id', 'valuation_assignment_id', 'report_template_id',
+        'tenant_id', 'valuation_assignment_id', 'client_id', 'report_template_id',
         'report_number', 'status', 'current_version_id', 'is_locked',
     ];
 

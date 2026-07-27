@@ -53,6 +53,7 @@ class RolePermissionSeeder extends Seeder
         'government_rates.manage', 'government_rates.approve',
         'invoices.view', 'invoices.create', 'invoices.record_payment', 'invoices.credit_note',
         'dashboards.view',
+        'client_portal_users.invite',
     ];
 
     private const ROLE_PERMISSIONS = [
@@ -66,12 +67,14 @@ class RolePermissionSeeder extends Seeder
             'risk_assessments.create', 'risk_assessments.view',
             'government_rates.manage', 'government_rates.approve',
             'invoices.view', 'invoices.create', 'invoices.record_payment', 'invoices.credit_note', 'dashboards.view',
+            'client_portal_users.invite',
         ],
         'Valuation Firm Administrator' => [
             'organizations.view', 'branches.view', 'branches.create', 'branches.update',
             'users.view', 'users.create', 'users.update',
             'assignments.view', 'assignments.create', 'assignments.update',
             'valuations.view', 'risk_assessments.view', 'invoices.view', 'invoices.create', 'dashboards.view',
+            'client_portal_users.invite',
         ],
         'Branch Administrator' => [
             'organizations.view', 'branches.view', 'users.view', 'users.create', 'users.update',

@@ -38,7 +38,7 @@ class ReportWorkflowService
     ): Report {
         $report = Report::firstOrCreate(
             ['tenant_id' => $assignment->tenant_id, 'valuation_assignment_id' => $assignment->id],
-            ['status' => 'drafting']
+            ['status' => 'drafting', 'client_id' => $assignment->client_id]
         );
 
         return DB::transaction(function () use ($report, $assignment, $reconciliation, $methodResults, $user) {

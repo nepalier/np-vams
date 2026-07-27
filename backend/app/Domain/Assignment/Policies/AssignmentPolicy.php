@@ -20,6 +20,10 @@ class AssignmentPolicy
             return false;
         }
 
+        if ($user->isClientPortalUser()) {
+            return $assignment->client_id === $user->client_id;
+        }
+
         // Ownership-scoped viewing: assignees can always see their own
         // assignments even without the blanket assignments.view permission
         // (e.g. a Field Surveyor sees only what they're assigned to).

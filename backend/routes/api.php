@@ -3,6 +3,8 @@
 use App\Domain\Assignment\Http\Controllers\AssignmentController;
 use App\Domain\Assignment\Http\Controllers\AssignmentWorkflowController;
 use App\Domain\Billing\Http\Controllers\InvoiceController;
+use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
+use App\Domain\ClientPortal\Http\Controllers\PortalController;
 use App\Domain\Dashboard\Http\Controllers\DashboardController;
 use App\Domain\Report\Http\Controllers\QrVerificationController;
 use App\Domain\Report\Http\Controllers\ReportController;
@@ -53,6 +55,22 @@ Route::prefix('v1')->group(function () {
         Route::get('/dashboards/market-analytics', [DashboardController::class, 'marketAnalytics']);
         Route::get('/dashboards/platform', [DashboardController::class, 'platform']);
         Route::get('/dashboards/clients/{clientId}', [DashboardController::class, 'clientInstitution']);
+
+        // Staff-side: tenant staff invite/manage their client's portal logins.
+        Route::post('/clients/{client}/portal-users', [ClientPortalUserController::class, 'store']);
+        Route::get('/clients/{client}/portal-users', [ClientPortalUserController::class, 'index']);
+
+        // Client-portal-facing: guarded by EnsureIsClientPortalUser on top of
+        // auth:sanctum+tenant. ClientPortalScope (bound by IdentifyTenant)
+        // does the actual data narrowing -- these routes don't re-filter by
+        // client_id themselves, proving the scope carries the weight.
+        Route::middleware('client.portal')->prefix('portal')->group(function () {
+            Route::get('/dashboard', [PortalController::class, 'dashboard']);
+            Route::get('/assignments', [PortalController::class, 'assignments']);
+            Route::get('/assignments/{assignmentId}', [PortalController::class, 'assignment']);
+            Route::get('/invoices', [PortalController::class, 'invoices']);
+            Route::get('/reports', [PortalController::class, 'reports']);
+        });
 
         // Income-approach, residual, reconciliation, and risk-assessment
         // trigger endpoints follow the identical pattern established above

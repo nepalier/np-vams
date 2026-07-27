@@ -9,6 +9,7 @@ use App\Domain\Client\Models\ClientBranch;
 use App\Domain\Party\Models\Borrower;
 use App\Domain\Workflow\Models\WorkflowTransition;
 use App\Models\Organization;
+use App\Support\Tenancy\ScopedToClientPortal;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +22,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class ValuationAssignment extends Model
 {
-    use BelongsToTenant, HasFactory, HasUuids, LogsActivity, SoftDeletes;
+    use BelongsToTenant, HasFactory, HasUuids, LogsActivity, ScopedToClientPortal, SoftDeletes;
 
     protected $fillable = [
         'tenant_id', 'organization_id', 'organization_branch_id', 'assignment_number', 'fiscal_year_id',

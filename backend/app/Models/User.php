@@ -28,6 +28,9 @@ class User extends Model implements AuthenticatableContract
         'tenant_id',
         'organization_id',
         'organization_branch_id',
+        'client_id',
+        'client_branch_id',
+        'user_type',
         'name',
         'name_ne',
         'email',
@@ -63,6 +66,28 @@ class User extends Model implements AuthenticatableContract
     public function branch(): BelongsTo
     {
         return $this->belongsTo(OrganizationBranch::class, 'organization_branch_id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(\App\Domain\Client\Models\Client::class);
+    }
+
+    public function clientBranch(): BelongsTo
+    {
+        return $this->belongsTo(\App\Domain\Client\Models\ClientBranch::class, 'client_branch_id');
+    }
+
+    /**
+     * The one thing that actually distinguishes a client-portal login from
+     * a tenant-staff login: client_id is set. Checked here rather than
+     * relying on `user_type` alone, since `user_type` is a convenience
+     * label -- this is the value IdentifyTenant middleware and every
+     * ScopedToClientPortal model actually key off of.
+     */
+    public function isClientPortalUser(): bool
+    {
+        return $this->client_id !== null;
     }
 
     public function tenant(): BelongsTo

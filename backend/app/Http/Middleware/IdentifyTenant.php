@@ -26,6 +26,13 @@ class IdentifyTenant
             app()->instance('currentTenantId', $user->tenant_id);
             app()->instance('currentOrganizationId', $user->organization_id);
             app()->instance('currentBranchId', $user->organization_branch_id);
+
+            // Only ever narrows visibility further (see ClientPortalScope) --
+            // staff users (client_id null) leave this unbound, so the scope
+            // is a complete no-op for them.
+            if ($user->isClientPortalUser()) {
+                app()->instance('currentClientId', $user->client_id);
+            }
         }
 
         return $next($request);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Billing\Models;
 
 use App\Support\Tenancy\BelongsToTenant;
+use App\Support\Tenancy\ScopedToClientPortal;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Invoice extends Model
 {
-    use BelongsToTenant, HasUuids, LogsActivity, SoftDeletes;
+    use BelongsToTenant, HasUuids, LogsActivity, ScopedToClientPortal, SoftDeletes;
 
     protected $fillable = [
         'tenant_id', 'valuation_assignment_id', 'client_id', 'invoice_number', 'fiscal_year_id',
