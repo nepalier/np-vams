@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-]use App\Support\Tenancy\BelongsToTenant;
+use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
