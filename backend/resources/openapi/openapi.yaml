@@ -1,0 +1,418 @@
+openapi: 3.0.3
+info:
+  title: NP-VAMS API
+  description: >
+    Nepal Property Valuation Management System -- REST API, versioned under /api/v1.
+    This document covers the core resource groups (auth, assignments, valuation
+    calculations, reports, billing, dashboards, client portal). It is NOT an
+    exhaustive per-field specification of all 60+ endpoints in the system --
+    stated plainly here rather than implied by omission. Endpoints follow a
+    consistent Request->Policy->Service->Resource pattern throughout; once
+    that pattern is understood from the documented endpoints below, the
+    remaining undocumented ones follow the same conventions (same auth,
+    same {data, meta, errors} envelope, same pagination).
+  version: "1.0"
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Assignments
+  - name: Valuation Calculations
+  - name: Reports
+  - name: Billing
+  - name: Dashboards
+  - name: Client Portal
+  - name: Public
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate and receive a Sanctum bearer token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                mfa_code: { type: string, description: "Required only if the account has MFA enabled" }
+      responses:
+        '200':
+          description: Login succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      token: { type: string }
+                      user: { $ref: '#/components/schemas/User' }
+        '422':
+          description: Invalid credentials, inactive account, or missing MFA code
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+
+  /me:
+    get:
+      tags: [Auth]
+      summary: Get the authenticated user's own profile
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+
+  /assignments:
+    get:
+      tags: [Assignments]
+      summary: List assignments (tenant- and client-portal-scoped automatically)
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+          description: Filter by workflow status code, e.g. "under_technical_review"
+        - name: client_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Assignment' }
+                  meta: { $ref: '#/components/schemas/PaginationMeta' }
+    post:
+      tags: [Assignments]
+      summary: Create a new valuation assignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StoreAssignmentRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/Assignment' } }
+
+  /assignments/{id}:
+    get:
+      tags: [Assignments]
+      summary: Get a single assignment, including its currently available workflow transitions
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/Assignment' } }
+        '403':
+          description: Not your tenant's assignment, or a client-portal user viewing another client's case
+
+  /assignments/{id}/workflow/transition:
+    post:
+      tags: [Assignments]
+      summary: Move an assignment to a new workflow status
+      description: >
+        Validated against the DB-driven workflow graph (workflow_statuses /
+        workflow_transition_rules) -- a transition not present in the
+        configured graph, or one the caller's role isn't permitted to make,
+        is rejected with a 422, not a generic error.
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [to_status]
+              properties:
+                to_status: { type: string, example: "submitted" }
+                remarks: { type: string, description: "Required for some transitions (e.g. correction_requested, cancelled)" }
+      responses:
+        '200': { description: Transitioned }
+        '422': { description: Invalid transition, missing required remarks, or role not permitted }
+
+  /assignments/{id}/calculations/market-comparison:
+    post:
+      tags: [Valuation Calculations]
+      summary: Run the market comparison engine and persist the result
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_id: { type: string, format: uuid }
+                comparables:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      base_rate: { type: number }
+                      weight: { type: number }
+                      comparable_property_id: { type: string, format: uuid }
+                      factors:
+                        type: object
+                        additionalProperties: { type: number }
+                        example: { time: 1.02, location: 0.95, road_width: 1.03 }
+      responses:
+        '201':
+          description: Calculation created, computed_details includes mean/median/weighted_average/outliers
+
+  /assignments/{id}/report/generate-draft:
+    post:
+      tags: [Reports]
+      summary: Generate a draft PDF+DOCX report from the assignment's latest reconciliation
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      responses:
+        '201': { description: Draft generated }
+        '422': { description: No reconciliation exists yet for this assignment }
+
+  /assignments/{id}/report/sign:
+    post:
+      tags: [Reports]
+      summary: Digitally sign the current PDF version (Approving Authority only)
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      responses:
+        '200': { description: Signed }
+        '403': { description: Caller does not hold the Approving Authority role }
+        '422': { description: Assignment is not in the "approved" workflow status }
+
+  /assignments/{id}/report/issue:
+    post:
+      tags: [Reports]
+      summary: Issue the signed report and generate its public QR verification token
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      responses:
+        '200': { description: Issued }
+
+  /verify/{token}:
+    get:
+      tags: [Public]
+      summary: Public, unauthenticated report verification
+      security: []
+      description: >
+        Returns ONLY the allow-listed public fields (report number, firm name,
+        report date, district/municipality, status, revision, signed-by name)
+        -- never citizenship number, loan amount, or owner contact info.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicVerification' }
+        '404': { description: Unknown token (also returned for a token that was never issued, to avoid a token-enumeration oracle) }
+
+  /invoices:
+    post:
+      tags: [Billing]
+      summary: Create an invoice with real VAT/TDS computation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateInvoiceRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/Invoice' } }
+
+  /invoices/{invoice}/payments:
+    post:
+      tags: [Billing]
+      summary: Record a payment against an invoice
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, payment_method]
+              properties:
+                amount: { type: number }
+                payment_method: { type: string, enum: [cash, bank_transfer, cheque, online] }
+                reference_number: { type: string }
+      responses:
+        '200': { description: Recorded }
+        '422': { description: Payment amount exceeds the outstanding balance }
+
+  /dashboards/firm:
+    get:
+      tags: [Dashboards]
+      summary: Valuation firm dashboard -- real-time aggregates for the caller's own tenant
+      responses:
+        '200': { description: OK }
+
+  /portal/dashboard:
+    get:
+      tags: [Client Portal]
+      summary: Client institution's own dashboard (portal users only)
+      description: Scoped automatically to the authenticated portal user's own client_id via ClientPortalScope.
+      responses:
+        '200': { description: OK }
+        '403': { description: Caller is not a client-portal account }
+
+  /portal/assignments:
+    get:
+      tags: [Client Portal]
+      summary: List the portal user's own institution's assignments only
+      responses:
+        '200': { description: OK }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum token
+
+  parameters:
+    AssignmentId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        roles: { type: array, items: { type: string } }
+        permissions: { type: array, items: { type: string } }
+
+    Assignment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        assignment_number: { type: string, example: "VAL-2082-000001" }
+        status: { type: string }
+        available_transitions: { type: array, items: { type: string } }
+        client_id: { type: string, format: uuid }
+        client_name: { type: string, nullable: true }
+        priority: { type: string, enum: [low, normal, high, urgent] }
+        total_fee: { type: string }
+        payment_status: { type: string }
+
+    StoreAssignmentRequest:
+      type: object
+      required: [client_id, assignment_date, priority, valuation_purpose_id, property_ids]
+      properties:
+        client_id: { type: string, format: uuid }
+        assignment_date: { type: string, format: date }
+        priority: { type: string, enum: [low, normal, high, urgent] }
+        valuation_purpose_id: { type: integer }
+        property_ids: { type: array, items: { type: string, format: uuid } }
+
+    Invoice:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        invoice_number: { type: string, example: "INV-2082-000001" }
+        subtotal: { type: string }
+        vat_amount: { type: string }
+        tds_amount: { type: string }
+        total_amount: { type: string }
+        outstanding_amount: { type: string }
+        status: { type: string, enum: [draft, issued, partially_paid, paid, overdue, cancelled] }
+
+    CreateInvoiceRequest:
+      type: object
+      required: [client_id, items]
+      properties:
+        client_id: { type: string, format: uuid }
+        valuation_assignment_id: { type: string, format: uuid, nullable: true }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              description: { type: string }
+              quantity: { type: number }
+              unit_rate: { type: number }
+        vat_pct: { type: number }
+        tds_pct: { type: number }
+
+    PublicVerification:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            report_number: { type: string }
+            valuation_firm: { type: string }
+            report_date: { type: string, format: date }
+            property_district: { type: string }
+            property_municipality: { type: string }
+            status: { type: string }
+            revision_number: { type: integer }
+            signed_by_name: { type: string }
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page: { type: integer }
+        last_page: { type: integer }
+        total: { type: integer }
+        per_page: { type: integer }
+
+    ErrorEnvelope:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              status: { type: string }
+              title: { type: string }
+              detail: { type: string }

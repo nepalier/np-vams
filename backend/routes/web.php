@@ -14,3 +14,12 @@ Route::get('/', fn () => Inertia::render('Dashboard/Index'));
 Route::get('/assignments', fn () => Inertia::render('Assignments/Index'));
 Route::get('/assignments/{id}', fn (string $id) => Inertia::render('Assignments/Show', ['id' => $id]));
 Route::get('/login', fn () => Inertia::render('Auth/Login'))->name('login');
+
+// API documentation (Section 40: "Generate complete OpenAPI or Swagger
+// documentation") -- publicly viewable, matching the convention of most
+// API docs sites; the underlying API endpoints themselves still require
+// real authentication, this page just describes them.
+Route::get('/docs/api', fn () => view('docs.api'));
+Route::get('/docs/openapi.yaml', function () {
+    return response(file_get_contents(resource_path('openapi/openapi.yaml')), 200, ['Content-Type' => 'application/yaml']);
+});

@@ -2,12 +2,14 @@
 
 use App\Domain\Assignment\Http\Controllers\AssignmentController;
 use App\Domain\Assignment\Http\Controllers\AssignmentWorkflowController;
+use App\Domain\Billing\Http\Controllers\BankReconciliationController;
 use App\Domain\Billing\Http\Controllers\CommissionController;
 use App\Domain\Billing\Http\Controllers\InvoiceController;
 use App\Domain\Building\Http\Controllers\BuildingConditionAssessmentController;
 use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
 use App\Domain\ClientPortal\Http\Controllers\PortalController;
 use App\Domain\Dashboard\Http\Controllers\DashboardController;
+use App\Domain\Gis\Http\Controllers\GisExportController;
 use App\Domain\Property\Http\Controllers\LandParcelCharacteristicsController;
 use App\Domain\Report\Http\Controllers\QrVerificationController;
 use App\Domain\Report\Http\Controllers\ReportController;
@@ -71,6 +73,15 @@ Route::prefix('v1')->group(function () {
         Route::post('/assignments/{assignment}/commissions', [CommissionController::class, 'store']);
         Route::post('/commissions/{commission}/approve', [CommissionController::class, 'approve']);
         Route::post('/commissions/{commission}/mark-paid', [CommissionController::class, 'markPaid']);
+
+        Route::post('/bank-reconciliation/import', [BankReconciliationController::class, 'import']);
+        Route::post('/bank-reconciliation/lines/{line}/match', [BankReconciliationController::class, 'matchManually']);
+        Route::get('/bank-reconciliation/unmatched-summary', [BankReconciliationController::class, 'unmatchedSummary']);
+
+        Route::get('/properties/{property}/export/geojson', [GisExportController::class, 'exportPropertyGeoJson']);
+        Route::get('/parcels/{parcel}/export/geojson', [GisExportController::class, 'exportParcelGeoJson']);
+        Route::get('/parcels/{parcel}/export/kml', [GisExportController::class, 'exportParcelKml']);
+        Route::post('/parcels/{parcel}/import/geojson', [GisExportController::class, 'importParcelBoundary']);
 
         Route::get('/dashboards/firm', [DashboardController::class, 'firm']);
         Route::get('/dashboards/market-analytics', [DashboardController::class, 'marketAnalytics']);
