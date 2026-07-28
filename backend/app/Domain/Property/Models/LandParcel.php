@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -41,6 +42,16 @@ class LandParcel extends Model
     public function property(): BelongsTo
     {
         return $this->belongsTo(Property::class);
+    }
+
+    public function characteristics(): HasOne
+    {
+        return $this->hasOne(LandParcelCharacteristics::class);
+    }
+
+    public function planning(): HasOne
+    {
+        return $this->hasOne(LandParcelPlanning::class);
     }
 
     public function getActivitylogOptions(): LogOptions

@@ -6,6 +6,7 @@ use App\Domain\Billing\Http\Controllers\InvoiceController;
 use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
 use App\Domain\ClientPortal\Http\Controllers\PortalController;
 use App\Domain\Dashboard\Http\Controllers\DashboardController;
+use App\Domain\Property\Http\Controllers\LandParcelCharacteristicsController;
 use App\Domain\Report\Http\Controllers\QrVerificationController;
 use App\Domain\Report\Http\Controllers\ReportController;
 use App\Domain\Review\Http\Controllers\ApprovalController;
@@ -37,6 +38,10 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/assignments/{assignment}/calculations/market-comparison', [ValuationCalculationController::class, 'marketComparison']);
         Route::post('/assignments/{assignment}/calculations/cost-approach', [ValuationCalculationController::class, 'costApproach']);
+
+        Route::get('/parcels/{parcel}/characteristics', [LandParcelCharacteristicsController::class, 'show']);
+        Route::put('/parcels/{parcel}/characteristics', [LandParcelCharacteristicsController::class, 'update']);
+        Route::get('/parcels/{parcel}/suggested-adjustment-factors', [LandParcelCharacteristicsController::class, 'suggestedAdjustmentFactors']);
 
         Route::post('/assignments/{assignment}/review/comments', [ReviewController::class, 'addComment']);
         Route::post('/assignments/{assignment}/review/decision', [ReviewController::class, 'decide']);
