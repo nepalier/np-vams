@@ -88,6 +88,16 @@ class ValuationAssignment extends Model
         return $this->belongsTo(Borrower::class);
     }
 
+    public function assignedValuer(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'assigned_valuer_id');
+    }
+
+    public function assignedApprover(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'assigned_approver_id');
+    }
+
     public function properties(): HasMany
     {
         return $this->hasMany(AssignmentProperty::class, 'valuation_assignment_id');

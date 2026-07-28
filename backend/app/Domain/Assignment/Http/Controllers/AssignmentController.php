@@ -24,6 +24,7 @@ class AssignmentController
         $this->authorizeAction('viewAny');
 
         $assignments = ValuationAssignment::query()
+            ->with(['client', 'valuationPurpose'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('client_id'), fn ($q) => $q->where('client_id', $request->string('client_id')))
             ->orderByDesc('created_at')
@@ -36,7 +37,9 @@ class AssignmentController
     {
         request()->user()->can('view', $assignment) || abort(403);
 
-        return (new AssignmentResource($assignment->load('properties')))->response();
+        return (new AssignmentResource($assignment->load([
+            'properties', 'client', 'valuationPurpose', 'assignedValuer', 'assignedApprover',
+        ])))->response();
     }
 
     public function store(StoreAssignmentRequest $request): JsonResponse
