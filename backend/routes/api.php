@@ -2,6 +2,7 @@
 
 use App\Domain\Assignment\Http\Controllers\AssignmentController;
 use App\Domain\Assignment\Http\Controllers\AssignmentWorkflowController;
+use App\Domain\Billing\Http\Controllers\CommissionController;
 use App\Domain\Billing\Http\Controllers\InvoiceController;
 use App\Domain\Building\Http\Controllers\BuildingConditionAssessmentController;
 use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
@@ -65,6 +66,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/invoices/{invoice}/payments', [InvoiceController::class, 'recordPayment']);
         Route::get('/clients/{clientId}/statement', [InvoiceController::class, 'clientStatement']);
         Route::get('/fiscal-years/{fiscalYearId}/financial-report', [InvoiceController::class, 'fiscalYearReport']);
+
+        Route::get('/commissions', [CommissionController::class, 'index']);
+        Route::post('/assignments/{assignment}/commissions', [CommissionController::class, 'store']);
+        Route::post('/commissions/{commission}/approve', [CommissionController::class, 'approve']);
+        Route::post('/commissions/{commission}/mark-paid', [CommissionController::class, 'markPaid']);
 
         Route::get('/dashboards/firm', [DashboardController::class, 'firm']);
         Route::get('/dashboards/market-analytics', [DashboardController::class, 'marketAnalytics']);
