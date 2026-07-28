@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'client.portal' => EnsureIsClientPortalUser::class,
         ]);
 
-        $middleware->statefulApi();
+       
 
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
