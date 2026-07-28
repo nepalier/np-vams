@@ -7,7 +7,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('APP_URL', 'http://localhost')],
+    'allowed_origins' => [env('APP_URL', 'http://bikram.pro.np')],
 
     'allowed_origins_patterns' => [],
 
