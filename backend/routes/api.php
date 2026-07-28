@@ -12,6 +12,7 @@ use App\Domain\Report\Http\Controllers\QrVerificationController;
 use App\Domain\Report\Http\Controllers\ReportController;
 use App\Domain\Review\Http\Controllers\ApprovalController;
 use App\Domain\Review\Http\Controllers\ReviewController;
+use App\Domain\SiteVisit\Http\Controllers\SitePhotoController;
 use App\Domain\Valuation\Http\Controllers\ValuationCalculationController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Resources\UserResource;
@@ -47,6 +48,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/buildings/{building}/condition-assessments', [BuildingConditionAssessmentController::class, 'store']);
         Route::get('/buildings/{building}/condition-assessments/latest', [BuildingConditionAssessmentController::class, 'show']);
         Route::get('/buildings/{building}/suggested-depreciation', [BuildingConditionAssessmentController::class, 'suggestedDepreciation']);
+
+        Route::post('/site-photos', [SitePhotoController::class, 'store']);
 
         Route::post('/assignments/{assignment}/review/comments', [ReviewController::class, 'addComment']);
         Route::post('/assignments/{assignment}/review/decision', [ReviewController::class, 'decide']);

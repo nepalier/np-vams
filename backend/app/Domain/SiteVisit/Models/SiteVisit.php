@@ -36,6 +36,11 @@ class SiteVisit extends Model
         return $this->belongsToMany(\App\Models\User::class, 'site_visit_members')->withPivot('role_on_visit');
     }
 
+    public function photos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SitePhoto::class);
+    }
+
     /**
      * Enforces Step 1 Section 17: "Prevent inspection completion if
      * mandatory information is missing." Called before allowing the
