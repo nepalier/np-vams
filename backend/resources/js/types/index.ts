@@ -44,6 +44,34 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export interface ValuationCalculation {
+  id: string;
+  valuation_assignment_id: string;
+  property_id: string | null;
+  method: string;
+  status: string;
+  computed_value: string;
+  computed_details: Record<string, unknown>;
+  calculated_at: string;
+}
+
+export interface ReportVersion {
+  id: string;
+  version_number: number;
+  format: string;
+  file_hash_sha256: string;
+  generated_at: string;
+}
+
+export interface Report {
+  id: string;
+  valuation_assignment_id: string;
+  report_number: string | null;
+  status: string;
+  is_locked: boolean;
+  current_version: ReportVersion | null;
+}
+
 export interface ApiEnvelope<T> {
   data: T;
   meta?: Record<string, unknown>;

@@ -2,6 +2,8 @@
 import { computed, onMounted, ref } from 'vue';
 import { apiFetch } from '../../Composables/useApi';
 import StatusBadge from '../../Components/ui/StatusBadge.vue';
+import ValuationSection from '../../Components/assignment/ValuationSection.vue';
+import ReportSection from '../../Components/assignment/ReportSection.vue';
 import type { Assignment } from '../../types';
 
 const props = defineProps<{ id: string }>();
@@ -142,6 +144,11 @@ onMounted(load);
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 mt-6">
+        <ValuationSection :assignment-id="assignment.id" />
+        <ReportSection :assignment-id="assignment.id" :assignment-status="assignment.status" />
       </div>
     </template>
   </div>

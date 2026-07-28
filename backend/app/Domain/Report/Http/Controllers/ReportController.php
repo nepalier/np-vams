@@ -19,6 +19,15 @@ class ReportController
 {
     public function __construct(private readonly ReportWorkflowService $service) {}
 
+    public function show(ValuationAssignment $assignment): JsonResponse
+    {
+        request()->user()->can('view', $assignment) || abort(403);
+
+        $report = Report::where('valuation_assignment_id', $assignment->id)->with('currentVersion')->first();
+
+        return response()->json(['data' => $report]);
+    }
+
     public function generateDraft(Request $request, ValuationAssignment $assignment): JsonResponse
     {
         $request->user()->can('view', $assignment) || abort(403);

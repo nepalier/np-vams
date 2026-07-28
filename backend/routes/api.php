@@ -59,6 +59,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/assignments/{assignment}/approval/decision', [ApprovalController::class, 'decide']);
 
         Route::post('/assignments/{assignment}/report/generate-draft', [ReportController::class, 'generateDraft']);
+        Route::get('/assignments/{assignment}/report', [ReportController::class, 'show']);
         Route::post('/assignments/{assignment}/report/sign', [ReportController::class, 'sign']);
         Route::post('/assignments/{assignment}/report/issue', [ReportController::class, 'issue']);
         Route::post('/assignments/{assignment}/report/cancel', [ReportController::class, 'cancel']);
