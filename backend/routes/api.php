@@ -3,6 +3,7 @@
 use App\Domain\Assignment\Http\Controllers\AssignmentController;
 use App\Domain\Assignment\Http\Controllers\AssignmentWorkflowController;
 use App\Domain\Billing\Http\Controllers\InvoiceController;
+use App\Domain\Building\Http\Controllers\BuildingConditionAssessmentController;
 use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
 use App\Domain\ClientPortal\Http\Controllers\PortalController;
 use App\Domain\Dashboard\Http\Controllers\DashboardController;
@@ -42,6 +43,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/parcels/{parcel}/characteristics', [LandParcelCharacteristicsController::class, 'show']);
         Route::put('/parcels/{parcel}/characteristics', [LandParcelCharacteristicsController::class, 'update']);
         Route::get('/parcels/{parcel}/suggested-adjustment-factors', [LandParcelCharacteristicsController::class, 'suggestedAdjustmentFactors']);
+
+        Route::post('/buildings/{building}/condition-assessments', [BuildingConditionAssessmentController::class, 'store']);
+        Route::get('/buildings/{building}/condition-assessments/latest', [BuildingConditionAssessmentController::class, 'show']);
+        Route::get('/buildings/{building}/suggested-depreciation', [BuildingConditionAssessmentController::class, 'suggestedDepreciation']);
 
         Route::post('/assignments/{assignment}/review/comments', [ReviewController::class, 'addComment']);
         Route::post('/assignments/{assignment}/review/decision', [ReviewController::class, 'decide']);

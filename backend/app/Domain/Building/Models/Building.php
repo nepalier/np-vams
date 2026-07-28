@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Building extends Model
@@ -41,5 +42,15 @@ class Building extends Model
     public function floors(): HasMany
     {
         return $this->hasMany(BuildingFloor::class)->orderBy('floor_number');
+    }
+
+    public function conditionAssessments(): HasMany
+    {
+        return $this->hasMany(BuildingConditionAssessment::class)->orderByDesc('assessed_at');
+    }
+
+    public function latestConditionAssessment(): HasOne
+    {
+        return $this->hasOne(BuildingConditionAssessment::class)->latestOfMany('assessed_at');
     }
 }
