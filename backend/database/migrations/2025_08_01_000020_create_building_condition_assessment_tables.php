@@ -56,7 +56,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-            $table->foreign('building_condition_assessment_id')->references('id')->on('building_condition_assessments')->cascadeOnDelete();
+            $table->foreign('building_condition_assessment_id', 'condition_items_assessment_fk')->references('id')->on('building_condition_assessments')->cascadeOnDelete();
             $table->unique(['building_condition_assessment_id', 'item_type'], 'condition_assessment_item_unique');
         });
     }
