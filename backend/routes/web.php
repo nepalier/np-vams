@@ -12,6 +12,7 @@ use Inertia\Inertia;
 // -- see resources/js/Pages/Dashboard/Index.vue.
 Route::get('/', fn () => Inertia::render('Dashboard/Index'));
 Route::get('/assignments', fn () => Inertia::render('Assignments/Index'));
+Route::get('/assignments/create', fn () => Inertia::render('Assignments/Create'));
 Route::get('/assignments/{id}', fn (string $id) => Inertia::render('Assignments/Show', ['id' => $id]));
 Route::get('/clients', fn () => Inertia::render('Clients/Index'));
 Route::get('/properties', fn () => Inertia::render('Properties/Index'));

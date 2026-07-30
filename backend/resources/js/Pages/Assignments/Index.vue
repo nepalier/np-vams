@@ -46,8 +46,11 @@ onMounted(load);
 <template>
   <div>
     <div class="flex items-center justify-between mb-4">
-      <h1 class="text-lg font-semibold">Assignments</h1>
-      <span class="text-sm text-gray-500" v-if="!loading">{{ total }} total</span>
+      <div class="flex items-center gap-3">
+        <h1 class="text-lg font-semibold">Assignments</h1>
+        <span class="text-sm text-gray-500" v-if="!loading">{{ total }} total</span>
+      </div>
+      <a href="/assignments/create" class="px-3 py-1.5 text-sm bg-brand-600 text-white rounded">+ New Assignment</a>
     </div>
 
     <div class="mb-4 flex items-center gap-3">
