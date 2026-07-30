@@ -60,7 +60,10 @@ class DemoScenarioSeeder extends Seeder
 
         $tenantId = $organization->tenant_id;
         app()->instance('currentTenantId', $tenantId);
-
+	 if (Property::where('tenant_id', $tenantId)->where('property_code', 'PROP-DEMO-001')->exists()) {
+         $this->command?->warn('Demo scenario already exists (PROP-DEMO-001 found) -- skipping to avoid duplicate records. Nothing to do.');
+         return;
+         }
         $adminUser = User::where('organization_id', $organization->id)->first();
 
         $client = Client::create([
