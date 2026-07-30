@@ -6,11 +6,14 @@ use App\Domain\Billing\Http\Controllers\BankReconciliationController;
 use App\Domain\Billing\Http\Controllers\CommissionController;
 use App\Domain\Billing\Http\Controllers\InvoiceController;
 use App\Domain\Building\Http\Controllers\BuildingConditionAssessmentController;
+use App\Domain\Client\Http\Controllers\ClientController;
 use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
 use App\Domain\ClientPortal\Http\Controllers\PortalController;
 use App\Domain\Dashboard\Http\Controllers\DashboardController;
 use App\Domain\Gis\Http\Controllers\GisExportController;
 use App\Domain\Property\Http\Controllers\LandParcelCharacteristicsController;
+use App\Domain\Property\Http\Controllers\LandParcelController;
+use App\Domain\Property\Http\Controllers\PropertyController;
 use App\Domain\Report\Http\Controllers\QrVerificationController;
 use App\Domain\Report\Http\Controllers\ReportController;
 use App\Domain\Review\Http\Controllers\ApprovalController;
@@ -40,6 +43,19 @@ Route::prefix('v1')->group(function () {
         Route::post('/assignments', [AssignmentController::class, 'store']);
         Route::get('/assignments/{assignment}', [AssignmentController::class, 'show']);
         Route::post('/assignments/{assignment}/workflow/transition', [AssignmentWorkflowController::class, 'transition']);
+
+        Route::get('/clients', [ClientController::class, 'index']);
+        Route::post('/clients', [ClientController::class, 'store']);
+        Route::get('/clients/{client}', [ClientController::class, 'show']);
+        Route::put('/clients/{client}', [ClientController::class, 'update']);
+
+        Route::get('/properties', [PropertyController::class, 'index']);
+        Route::post('/properties', [PropertyController::class, 'store']);
+        Route::get('/properties/{property}', [PropertyController::class, 'show']);
+        Route::put('/properties/{property}', [PropertyController::class, 'update']);
+        Route::get('/properties/{property}/parcels', [LandParcelController::class, 'index']);
+        Route::post('/properties/{property}/parcels', [LandParcelController::class, 'store']);
+        Route::get('/parcels/{parcel}', [LandParcelController::class, 'show']);
 
         Route::post('/assignments/{assignment}/calculations/market-comparison', [ValuationCalculationController::class, 'marketComparison']);
         Route::post('/assignments/{assignment}/calculations/cost-approach', [ValuationCalculationController::class, 'costApproach']);
