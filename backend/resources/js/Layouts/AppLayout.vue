@@ -13,6 +13,8 @@ const page = usePage<{ auth?: { user: AuthUser } }>();
         <nav class="flex items-center gap-4 text-sm text-brand-50">
           <a href="/" class="hover:text-white">Dashboard</a>
           <a href="/assignments" class="hover:text-white">Assignments</a>
+          <a href="/clients" class="hover:text-white">Clients</a>
+          <a href="/properties" class="hover:text-white">Properties</a>
         </nav>
       </div>
       <div v-if="page.props.auth?.user" class="text-sm">
