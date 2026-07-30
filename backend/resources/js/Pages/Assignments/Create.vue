@@ -3,10 +3,12 @@ import { onMounted, ref } from 'vue';
 import { apiFetch } from '../../Composables/useApi';
 
 interface Option { id: string | number; name_en: string; }
+interface PropertyOption { id: string; name_en: string; }
 
 const clients = ref<Option[]>([]);
 const purposes = ref<Option[]>([]);
-const properties = ref<Option[]>([]);
+const properties = ref<PropertyOption[]>([]);
+
 const loadingOptions = ref(true);
 const submitting = ref(false);
 const error = ref<string | null>(null);
