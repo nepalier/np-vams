@@ -100,7 +100,9 @@ onMounted(load);
       </thead>
       <tbody>
         <tr v-for="p in properties" :key="p.id" class="border-t">
-          <td class="px-4 py-2 font-medium text-brand-700">{{ p.property_code }}</td>
+          <td class="px-4 py-2 font-medium text-brand-700">
+            <a :href="`/properties/${p.id}`" class="hover:underline">{{ p.property_code }}</a>
+          </td>
           <td class="px-4 py-2">{{ p.property_name ?? '—' }}</td>
           <td class="px-4 py-2">{{ p.address ?? '—' }}</td>
           <td class="px-4 py-2">{{ p.district_name ?? '—' }}</td>

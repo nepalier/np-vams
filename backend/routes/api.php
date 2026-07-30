@@ -6,6 +6,7 @@ use App\Domain\Billing\Http\Controllers\BankReconciliationController;
 use App\Domain\Billing\Http\Controllers\CommissionController;
 use App\Domain\Billing\Http\Controllers\InvoiceController;
 use App\Domain\Building\Http\Controllers\BuildingConditionAssessmentController;
+use App\Domain\Building\Http\Controllers\BuildingController;
 use App\Domain\Client\Http\Controllers\ClientController;
 use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
 use App\Domain\ClientPortal\Http\Controllers\PortalController;
@@ -62,6 +63,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/properties/{property}/parcels', [LandParcelController::class, 'index']);
         Route::post('/properties/{property}/parcels', [LandParcelController::class, 'store']);
         Route::get('/parcels/{parcel}', [LandParcelController::class, 'show']);
+        Route::get('/properties/{property}/buildings', [BuildingController::class, 'index']);
+        Route::post('/properties/{property}/buildings', [BuildingController::class, 'store']);
+        Route::get('/buildings/{building}', [BuildingController::class, 'show']);
 
         Route::post('/assignments/{assignment}/calculations/market-comparison', [ValuationCalculationController::class, 'marketComparison']);
         Route::post('/assignments/{assignment}/calculations/cost-approach', [ValuationCalculationController::class, 'costApproach']);
