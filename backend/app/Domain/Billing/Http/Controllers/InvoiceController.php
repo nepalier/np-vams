@@ -19,6 +19,36 @@ class InvoiceController
 {
     public function __construct(private readonly BillingService $service) {}
 
+    public function index(Request $request): JsonResponse
+    {
+        $request->user()->can('invoices.view') || abort(403);
+
+        $invoices = Invoice::query()
+            ->with('client')
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
+            ->when($request->filled('client_id'), fn ($q) => $q->where('client_id', $request->string('client_id')))
+            ->orderByDesc('issue_date')
+            ->paginate($request->integer('per_page', 20));
+
+        return response()->json($invoices->through(fn ($invoice) => [
+            'id' => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+            'client_name' => $invoice->client?->name_en,
+            'issue_date' => $invoice->issue_date?->toDateString(),
+            'due_date' => $invoice->due_date?->toDateString(),
+            'total_amount' => $invoice->total_amount,
+            'outstanding_amount' => $invoice->outstanding_amount,
+            'status' => $invoice->status,
+        ]));
+    }
+
+    public function show(Invoice $invoice): JsonResponse
+    {
+        request()->user()->can('invoices.view') || abort(403);
+
+        return response()->json(['data' => $invoice->load(['client', 'items', 'payments', 'creditNotes'])]);
+    }
+
     public function store(CreateInvoiceRequest $request): JsonResponse
     {
         try {

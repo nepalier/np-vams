@@ -7,6 +7,8 @@ namespace App\Domain\Review\Http\Controllers;
 use App\Domain\Assignment\Models\ValuationAssignment;
 use App\Domain\Review\Http\Requests\AddReviewCommentRequest;
 use App\Domain\Review\Http\Requests\RecordDecisionRequest;
+use App\Domain\Review\Models\ApprovalRecord;
+use App\Domain\Review\Models\ReviewComment;
 use App\Domain\Review\Services\ReviewService;
 use Illuminate\Http\JsonResponse;
 use RuntimeException;
@@ -14,6 +16,18 @@ use RuntimeException;
 class ReviewController
 {
     public function __construct(private readonly ReviewService $service) {}
+
+    public function index(ValuationAssignment $assignment): JsonResponse
+    {
+        request()->user()->can('view', $assignment) || abort(403);
+
+        return response()->json([
+            'data' => [
+                'comments' => ReviewComment::where('valuation_assignment_id', $assignment->id)->orderByDesc('created_at')->get(),
+                'decisions' => ApprovalRecord::where('valuation_assignment_id', $assignment->id)->orderByDesc('decided_at')->get(),
+            ],
+        ]);
+    }
 
     public function addComment(AddReviewCommentRequest $request, ValuationAssignment $assignment): JsonResponse
     {

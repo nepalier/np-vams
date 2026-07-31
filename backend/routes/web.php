@@ -17,6 +17,7 @@ Route::get('/assignments/{id}', fn (string $id) => Inertia::render('Assignments/
 Route::get('/clients', fn () => Inertia::render('Clients/Index'));
 Route::get('/properties', fn () => Inertia::render('Properties/Index'));
 Route::get('/properties/{id}', fn (string $id) => Inertia::render('Properties/Show', ['id' => $id]));
+Route::get('/invoices', fn () => Inertia::render('Invoices/Index'));
 Route::get('/login', fn () => Inertia::render('Auth/Login'))->name('login');
 
 // API documentation (Section 40: "Generate complete OpenAPI or Swagger

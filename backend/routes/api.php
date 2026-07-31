@@ -80,6 +80,7 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/site-photos', [SitePhotoController::class, 'store']);
 
+        Route::get('/assignments/{assignment}/review', [ReviewController::class, 'index']);
         Route::post('/assignments/{assignment}/review/comments', [ReviewController::class, 'addComment']);
         Route::post('/assignments/{assignment}/review/decision', [ReviewController::class, 'decide']);
         Route::post('/assignments/{assignment}/approval/decision', [ApprovalController::class, 'decide']);
@@ -92,6 +93,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/assignments/{assignment}/report/supersede', [ReportController::class, 'supersede']);
 
         Route::post('/invoices', [InvoiceController::class, 'store']);
+        Route::get('/invoices', [InvoiceController::class, 'index']);
+        Route::get('/invoices/{invoice}', [InvoiceController::class, 'show']);
         Route::post('/invoices/{invoice}/payments', [InvoiceController::class, 'recordPayment']);
         Route::get('/clients/{clientId}/statement', [InvoiceController::class, 'clientStatement']);
         Route::get('/fiscal-years/{fiscalYearId}/financial-report', [InvoiceController::class, 'fiscalYearReport']);
