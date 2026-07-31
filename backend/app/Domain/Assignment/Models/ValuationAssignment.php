@@ -108,6 +108,11 @@ class ValuationAssignment extends Model
         return $this->hasMany(AssignmentProperty::class, 'valuation_assignment_id');
     }
 
+    public function siteVisits(): HasMany
+    {
+        return $this->hasMany(\App\Domain\SiteVisit\Models\SiteVisit::class, 'valuation_assignment_id');
+    }
+
     public function parentAssignment(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_assignment_id');

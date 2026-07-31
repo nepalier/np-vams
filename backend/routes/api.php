@@ -24,6 +24,7 @@ use App\Domain\Report\Http\Controllers\ReportController;
 use App\Domain\Review\Http\Controllers\ApprovalController;
 use App\Domain\Review\Http\Controllers\ReviewController;
 use App\Domain\SiteVisit\Http\Controllers\SitePhotoController;
+use App\Domain\SiteVisit\Http\Controllers\SiteVisitController;
 use App\Domain\Valuation\Http\Controllers\ValuationCalculationController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Resources\UserResource;
@@ -97,6 +98,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/buildings/{building}/suggested-depreciation', [BuildingConditionAssessmentController::class, 'suggestedDepreciation']);
 
         Route::post('/site-photos', [SitePhotoController::class, 'store']);
+
+        Route::get('/assignments/{assignment}/site-visits', [SiteVisitController::class, 'index']);
+        Route::post('/assignments/{assignment}/site-visits', [SiteVisitController::class, 'store']);
+        Route::get('/site-visits/{siteVisit}', [SiteVisitController::class, 'show']);
+        Route::post('/site-visits/{siteVisit}/check-in', [SiteVisitController::class, 'checkIn']);
+        Route::put('/site-visits/{siteVisit}', [SiteVisitController::class, 'update']);
+        Route::post('/site-visits/{siteVisit}/complete', [SiteVisitController::class, 'complete']);
 
         Route::get('/assignments/{assignment}/review', [ReviewController::class, 'index']);
         Route::post('/assignments/{assignment}/review/comments', [ReviewController::class, 'addComment']);

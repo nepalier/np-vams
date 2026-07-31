@@ -7,12 +7,13 @@
  */
 export async function apiFetch<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('npvams_token');
+  const isFormData = options.body instanceof FormData;
 
   const response = await fetch(path, {
     ...options,
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers ?? {}),
     },
