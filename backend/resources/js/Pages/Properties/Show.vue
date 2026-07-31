@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { apiFetch } from '../../Composables/useApi';
+import ParcelCharacteristicsPanel from '../../Components/property/ParcelCharacteristicsPanel.vue';
+import BuildingConditionPanel from '../../Components/property/BuildingConditionPanel.vue';
 
 const props = defineProps<{ id: string }>();
 
@@ -26,6 +28,9 @@ const submittingParcel = ref(false);
 const showBuildingForm = ref(false);
 const buildingForm = ref({ building_name: '', number_of_floors: 1, structural_system: 'rcc_frame', current_use: '' });
 const submittingBuilding = ref(false);
+
+const expandedParcelId = ref<string | null>(null);
+const expandedBuildingId = ref<string | null>(null);
 
 async function loadAll() {
   loading.value = true;
@@ -128,12 +133,17 @@ onMounted(loadAll);
         </div>
 
         <p v-if="parcels.length === 0" class="text-sm text-gray-400">No parcels recorded yet.</p>
-        <table v-else class="w-full text-sm">
-          <thead class="text-gray-500 text-left"><tr><th class="py-1">Kitta #</th><th class="py-1">Area (sqm)</th></tr></thead>
-          <tbody>
-            <tr v-for="p in parcels" :key="p.id" class="border-t"><td class="py-1">{{ p.kitta_number }}</td><td class="py-1">{{ p.area_considered_sqm ?? '—' }}</td></tr>
-          </tbody>
-        </table>
+        <div v-else>
+          <div v-for="p in parcels" :key="p.id" class="border-t py-2">
+            <div class="flex items-center justify-between text-sm">
+              <span>{{ p.kitta_number }} — {{ p.area_considered_sqm ?? '—' }} sqm</span>
+              <button class="text-xs text-brand-600" @click="expandedParcelId = expandedParcelId === p.id ? null : p.id">
+                {{ expandedParcelId === p.id ? 'Hide' : 'Edit Characteristics' }}
+              </button>
+            </div>
+            <ParcelCharacteristicsPanel v-if="expandedParcelId === p.id" :parcel-id="p.id" />
+          </div>
+        </div>
       </div>
 
       <!-- Buildings -->
@@ -176,8 +186,16 @@ onMounted(loadAll);
         <p v-if="buildings.length === 0" class="text-sm text-gray-400">No buildings recorded yet.</p>
         <div v-else class="space-y-2">
           <div v-for="b in buildings" :key="b.id" class="border-t pt-2 text-sm">
-            <span class="font-medium">{{ b.building_name ?? 'Unnamed building' }}</span>
-            <span class="text-gray-500"> · {{ b.number_of_floors }} floor(s) · {{ b.structural_system ?? '—' }}</span>
+            <div class="flex items-center justify-between">
+              <span>
+                <span class="font-medium">{{ b.building_name ?? 'Unnamed building' }}</span>
+                <span class="text-gray-500"> · {{ b.number_of_floors }} floor(s) · {{ b.structural_system ?? '—' }}</span>
+              </span>
+              <button class="text-xs text-brand-600" @click="expandedBuildingId = expandedBuildingId === b.id ? null : b.id">
+                {{ expandedBuildingId === b.id ? 'Hide' : 'Record Condition Assessment' }}
+              </button>
+            </div>
+            <BuildingConditionPanel v-if="expandedBuildingId === b.id" :building-id="b.id" />
           </div>
         </div>
       </div>

@@ -69,6 +69,8 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/assignments/{assignment}/calculations/market-comparison', [ValuationCalculationController::class, 'marketComparison']);
         Route::post('/assignments/{assignment}/calculations/cost-approach', [ValuationCalculationController::class, 'costApproach']);
+        Route::post('/assignments/{assignment}/calculations/weighted-land-rate', [ValuationCalculationController::class, 'weightedLandRate']);
+        Route::post('/assignments/{assignment}/calculations/vehicle', [ValuationCalculationController::class, 'vehicleValuation']);
 
         Route::get('/parcels/{parcel}/characteristics', [LandParcelCharacteristicsController::class, 'show']);
         Route::put('/parcels/{parcel}/characteristics', [LandParcelCharacteristicsController::class, 'update']);

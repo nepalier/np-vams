@@ -24,6 +24,8 @@ class ValuationCalculationService
         private readonly CostApproachEngine $costApproachEngine,
         private readonly IncomeApproachEngine $incomeApproachEngine,
         private readonly ResidualEngine $residualEngine,
+        private readonly WeightedLandRateEngine $weightedLandRateEngine,
+        private readonly VehicleValuationEngine $vehicleValuationEngine,
     ) {}
 
     public function runMarketComparison(
@@ -143,6 +145,55 @@ class ValuationCalculationService
             'status' => 'draft',
             'input_snapshot' => $input,
             'computed_value' => $result['residual_land_value'],
+            'computed_details' => $result,
+            'calculated_by_user_id' => $calculatedByUserId,
+            'calculated_at' => now(),
+        ]);
+    }
+
+    public function runWeightedLandRate(
+        string $tenantId,
+        string $assignmentId,
+        ?string $propertyId,
+        array $input,
+        ?string $calculatedByUserId,
+    ): ValuationCalculation {
+        $result = $this->weightedLandRateEngine->calculate($input['plots']);
+
+        return ValuationCalculation::create([
+            'tenant_id' => $tenantId,
+            'valuation_assignment_id' => $assignmentId,
+            'property_id' => $propertyId,
+            'method' => 'weighted_land_rate',
+            'status' => 'draft',
+            'input_snapshot' => $input,
+            'computed_value' => $result['total_land_value'],
+            'computed_details' => $result,
+            'calculated_by_user_id' => $calculatedByUserId,
+            'calculated_at' => now(),
+        ]);
+    }
+
+    public function runVehicleValuation(
+        string $tenantId,
+        string $assignmentId,
+        array $input,
+        ?string $calculatedByUserId,
+    ): ValuationCalculation {
+        $result = $this->vehicleValuationEngine->calculate(
+            currentMarketPriceOfNew: (float) $input['current_market_price_of_new'],
+            ageYears: (float) $input['age_years'],
+            otherReducingFactors: (float) ($input['other_reducing_factors'] ?? 0),
+        );
+
+        return ValuationCalculation::create([
+            'tenant_id' => $tenantId,
+            'valuation_assignment_id' => $assignmentId,
+            'property_id' => null, // vehicles/machinery are not tied to a land property
+            'method' => 'vehicle',
+            'status' => 'draft',
+            'input_snapshot' => $input,
+            'computed_value' => $result['net_fair_market_value'],
             'computed_details' => $result,
             'calculated_by_user_id' => $calculatedByUserId,
             'calculated_at' => now(),

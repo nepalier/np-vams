@@ -7,6 +7,8 @@ namespace App\Domain\Valuation\Http\Controllers;
 use App\Domain\Assignment\Models\ValuationAssignment;
 use App\Domain\Valuation\Http\Requests\CostApproachRequest;
 use App\Domain\Valuation\Http\Requests\MarketComparisonRequest;
+use App\Domain\Valuation\Http\Requests\VehicleValuationRequest;
+use App\Domain\Valuation\Http\Requests\WeightedLandRateRequest;
 use App\Domain\Valuation\Http\Resources\ValuationCalculationResource;
 use App\Domain\Valuation\Services\ValuationCalculationService;
 use Illuminate\Http\JsonResponse;
@@ -66,5 +68,42 @@ class ValuationCalculationController
         return response()->json([
             'errors' => [['status' => '422', 'title' => 'InvalidCalculationInput', 'detail' => $e->getMessage()]],
         ], 422);
+    }
+
+    public function weightedLandRate(WeightedLandRateRequest $request, ValuationAssignment $assignment): JsonResponse
+    {
+        $request->user()->can('view', $assignment) || abort(403);
+
+        try {
+            $calculation = $this->service->runWeightedLandRate(
+                tenantId: $request->user()->tenant_id,
+                assignmentId: $assignment->id,
+                propertyId: $request->input('property_id'),
+                input: $request->only('plots'),
+                calculatedByUserId: $request->user()->id,
+            );
+        } catch (RuntimeException|\InvalidArgumentException $e) {
+            return $this->calculationError($e);
+        }
+
+        return (new ValuationCalculationResource($calculation))->response()->setStatusCode(201);
+    }
+
+    public function vehicleValuation(VehicleValuationRequest $request, ValuationAssignment $assignment): JsonResponse
+    {
+        $request->user()->can('view', $assignment) || abort(403);
+
+        try {
+            $calculation = $this->service->runVehicleValuation(
+                tenantId: $request->user()->tenant_id,
+                assignmentId: $assignment->id,
+                input: $request->validated(),
+                calculatedByUserId: $request->user()->id,
+            );
+        } catch (RuntimeException|\InvalidArgumentException $e) {
+            return $this->calculationError($e);
+        }
+
+        return (new ValuationCalculationResource($calculation))->response()->setStatusCode(201);
     }
 }
