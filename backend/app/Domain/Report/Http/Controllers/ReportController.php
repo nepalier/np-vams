@@ -40,12 +40,18 @@ class ReportController
             return $this->error('A valuation reconciliation must exist before a report can be generated. Reconcile the methods first.');
         }
 
+        $template = $request->input('template', 'default');
+        if (! in_array($template, ['default', 'bank_standard_np'], true)) {
+            return $this->error("Unknown report template: {$template}");
+        }
+
         try {
             $report = $this->service->generateDraft(
                 $assignment,
                 $reconciliation,
                 $reconciliation->method_inputs,
                 $request->user(),
+                template: $template,
             );
         } catch (RuntimeException $e) {
             return $this->error($e->getMessage());

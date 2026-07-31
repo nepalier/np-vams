@@ -35,16 +35,17 @@ class ReportWorkflowService
         ValuationReconciliation $reconciliation,
         array $methodResults,
         User $user,
+        string $template = 'default',
     ): Report {
         $report = Report::firstOrCreate(
             ['tenant_id' => $assignment->tenant_id, 'valuation_assignment_id' => $assignment->id],
             ['status' => 'drafting', 'client_id' => $assignment->client_id]
         );
 
-        return DB::transaction(function () use ($report, $assignment, $reconciliation, $methodResults, $user) {
+        return DB::transaction(function () use ($report, $assignment, $reconciliation, $methodResults, $user, $template) {
             $nextVersionNumber = ($report->versions()->max('version_number') ?? 0) + 1;
 
-            $pdfBytes = $this->generationService->renderPdf($report, $assignment, $reconciliation, $methodResults, $nextVersionNumber);
+            $pdfBytes = $this->generationService->renderPdf($report, $assignment, $reconciliation, $methodResults, $nextVersionNumber, template: $template);
             $this->integrityService->createVersion($report, $pdfBytes, 'pdf', $user->id);
 
             $docxBytes = $this->generationService->renderDocx($report, $assignment, $reconciliation, $methodResults, $nextVersionNumber);

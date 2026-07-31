@@ -6,7 +6,9 @@ namespace App\Domain\Report\Services;
 
 use App\Domain\Assignment\Models\ValuationAssignment;
 use App\Domain\Report\Models\Report;
+use App\Domain\Valuation\Models\ValuationCalculation;
 use App\Domain\Valuation\Models\ValuationReconciliation;
+use App\Domain\Valuation\Services\ValuationCertificateSummaryService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
@@ -38,10 +40,11 @@ class ReportGenerationService
         ?string $signerName = null,
         ?string $signerLicenseNumber = null,
         ?string $riskCategory = null,
+        string $template = 'default',
     ): string {
         $data = $this->templateData($report, $assignment, $reconciliation, $methodResults, $versionNumber, $signerName, $signerLicenseNumber, $riskCategory);
 
-        return Pdf::loadView('reports.templates.default', $data)->output();
+        return Pdf::loadView("reports.templates.{$template}", $data)->output();
     }
 
     public function renderDocx(
@@ -113,11 +116,33 @@ class ReportGenerationService
             ->pluck('property')
             ->filter();
 
+        // The latest weighted-land-rate and building-cost-estimation
+        // calculations for this assignment, if either was ever run --
+        // both nullable in the template, since not every report has a
+        // land component (a pure building revaluation) or a building
+        // component (vacant land).
+        $landRateCalculation = ValuationCalculation::where('valuation_assignment_id', $assignment->id)
+            ->where('method', 'weighted_land_rate')->latest('calculated_at')->first();
+
+        $buildingCostCalculation = ValuationCalculation::where('valuation_assignment_id', $assignment->id)
+            ->where('method', 'building_cost_estimation')->latest('calculated_at')->first();
+
+        $client = $assignment->client;
+
+        $certificateSummary = app(ValuationCertificateSummaryService::class)->generate([
+            'weighted_fair_market_value' => (float) $reconciliation->reconciled_market_value,
+            'government_weight_pct' => (float) ($client?->land_rate_government_weight_pct ?? 30.0),
+            'market_weight_pct' => (float) ($client?->land_rate_market_weight_pct ?? 70.0),
+            'distress_value_pct' => (float) ($client?->distress_value_pct ?? 80.0),
+            'inspection_date' => optional($assignment->assignment_date)->toDateString() ?? now()->toDateString(),
+            'comments' => null,
+        ]);
+
         return [
             'report' => $report,
             'assignment' => $assignment,
             'organization' => $assignment->organization,
-            'client' => $assignment->client,
+            'client' => $client,
             'borrower' => $assignment->borrower,
             'valuationPurpose' => $assignment->valuationPurpose?->name_en ?? '—',
             'properties' => $properties,
@@ -127,6 +152,9 @@ class ReportGenerationService
             'signerName' => $signerName,
             'signerLicenseNumber' => $signerLicenseNumber,
             'riskCategory' => $riskCategory,
+            'landRateCalculation' => $landRateCalculation,
+            'buildingCostCalculation' => $buildingCostCalculation,
+            'certificateSummary' => $certificateSummary,
             'locale' => 'en',
         ];
     }
