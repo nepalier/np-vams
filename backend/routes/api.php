@@ -16,6 +16,7 @@ use App\Domain\MasterData\Http\Controllers\MasterDataController;
 use App\Domain\Property\Http\Controllers\LandParcelCharacteristicsController;
 use App\Domain\Property\Http\Controllers\LandParcelController;
 use App\Domain\Property\Http\Controllers\PropertyController;
+use App\Domain\Settings\Http\Controllers\TenantSettingsController;
 use App\Domain\Report\Http\Controllers\QrVerificationController;
 use App\Domain\Report\Http\Controllers\ReportController;
 use App\Domain\Review\Http\Controllers\ApprovalController;
@@ -71,6 +72,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/assignments/{assignment}/calculations/cost-approach', [ValuationCalculationController::class, 'costApproach']);
         Route::post('/assignments/{assignment}/calculations/weighted-land-rate', [ValuationCalculationController::class, 'weightedLandRate']);
         Route::post('/assignments/{assignment}/calculations/vehicle', [ValuationCalculationController::class, 'vehicleValuation']);
+        Route::post('/assignments/{assignment}/calculations/building-cost-estimation', [ValuationCalculationController::class, 'buildingCostEstimation']);
+        Route::post('/assignments/{assignment}/certificate-summary', [ValuationCalculationController::class, 'certificateSummary']);
+
+        Route::get('/settings', [TenantSettingsController::class, 'show']);
+        Route::put('/settings', [TenantSettingsController::class, 'update']);
 
         Route::get('/parcels/{parcel}/characteristics', [LandParcelCharacteristicsController::class, 'show']);
         Route::put('/parcels/{parcel}/characteristics', [LandParcelCharacteristicsController::class, 'update']);

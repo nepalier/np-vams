@@ -68,6 +68,11 @@ class ValuationAssignment extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Tenant::class);
+    }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

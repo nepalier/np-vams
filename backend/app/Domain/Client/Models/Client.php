@@ -21,6 +21,7 @@ class Client extends Model
         'tenant_id', 'name_en', 'name_ne', 'client_type', 'registration_number',
         'pan_number', 'vat_number', 'address', 'telephone', 'email',
         'authorized_contact_person', 'is_active', 'remarks',
+        'land_rate_government_weight_pct', 'land_rate_market_weight_pct', 'distress_value_pct',
     ];
 
     protected $casts = ['is_active' => 'boolean'];

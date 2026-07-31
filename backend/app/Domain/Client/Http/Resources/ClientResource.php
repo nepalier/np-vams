@@ -23,6 +23,9 @@ class ClientResource extends JsonResource
             'telephone' => $this->telephone,
             'email' => $this->email,
             'authorized_contact_person' => $this->authorized_contact_person,
+            'land_rate_government_weight_pct' => $this->land_rate_government_weight_pct,
+            'land_rate_market_weight_pct' => $this->land_rate_market_weight_pct,
+            'distress_value_pct' => $this->distress_value_pct,
             'is_active' => $this->is_active,
             'branches' => $this->whenLoaded('branches', fn () => $this->branches->map(fn ($b) => [
                 'id' => $b->id, 'name_en' => $b->name_en, 'branch_code' => $b->branch_code,

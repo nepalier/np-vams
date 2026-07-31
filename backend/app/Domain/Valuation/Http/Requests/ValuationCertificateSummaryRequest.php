@@ -6,7 +6,7 @@ namespace App\Domain\Valuation\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class WeightedLandRateRequest extends FormRequest
+class ValuationCertificateSummaryRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,14 +16,12 @@ class WeightedLandRateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'property_id' => ['nullable', 'uuid', 'exists:properties,id'],
+            'weighted_fair_market_value' => ['nullable', 'numeric', 'min:0'], // falls back to the assignment's latest weighted_land_rate calculation if omitted
             'government_weight_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'market_weight_pct' => ['nullable', 'numeric', 'min:0', 'max:100', 'required_with:government_weight_pct'],
-            'plots' => ['required', 'array', 'min:1'],
-            'plots.*.plot_label' => ['required', 'string', 'max:100'],
-            'plots.*.area_considered' => ['required', 'numeric', 'min:0'],
-            'plots.*.government_rate' => ['required', 'numeric', 'min:0'],
-            'plots.*.market_rate' => ['required', 'numeric', 'min:0'],
+            'distress_value_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'inspection_date' => ['required', 'date'],
+            'comments' => ['nullable', 'string'],
         ];
     }
 }

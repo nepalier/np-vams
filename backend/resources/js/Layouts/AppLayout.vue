@@ -16,6 +16,7 @@ const page = usePage<{ auth?: { user: AuthUser } }>();
           <a href="/clients" class="hover:text-white">Clients</a>
           <a href="/properties" class="hover:text-white">Properties</a>
           <a href="/invoices" class="hover:text-white">Invoices</a>
+          <a href="/settings" class="hover:text-white">Settings</a>
         </nav>
       </div>
       <div v-if="page.props.auth?.user" class="text-sm">

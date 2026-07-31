@@ -23,6 +23,15 @@ class Tenant extends Model
         'status',
         'subscription_starts_at',
         'subscription_ends_at',
+        'default_land_rate_government_weight_pct',
+        'default_land_rate_market_weight_pct',
+        'default_distress_value_pct',
+        'default_vehicle_scrap_pct',
+        'default_vehicle_depreciation_pct_per_annum',
+        'default_vehicle_other_cost_pct_per_annum',
+        'default_building_sanitary_fixture_pct',
+        'default_building_electrical_fixture_pct',
+        'default_building_depreciation_pct_per_annum',
     ];
 
     protected $casts = [

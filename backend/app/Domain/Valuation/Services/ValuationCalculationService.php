@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Valuation\Services;
 
+use App\Domain\Assignment\Models\ValuationAssignment;
 use App\Domain\Comparable\Models\ComparableAdjustment;
 use App\Domain\Valuation\Models\ValuationCalculation;
 use App\Domain\Valuation\Models\ValuationCalculationItem;
@@ -26,6 +27,7 @@ class ValuationCalculationService
         private readonly ResidualEngine $residualEngine,
         private readonly WeightedLandRateEngine $weightedLandRateEngine,
         private readonly VehicleValuationEngine $vehicleValuationEngine,
+        private readonly BuildingCostEstimationEngine $buildingCostEstimationEngine,
     ) {}
 
     public function runMarketComparison(
@@ -158,7 +160,8 @@ class ValuationCalculationService
         array $input,
         ?string $calculatedByUserId,
     ): ValuationCalculation {
-        $result = $this->weightedLandRateEngine->calculate($input['plots']);
+        $engine = $this->resolveWeightedLandRateEngine($assignmentId, $input);
+        $result = $engine->calculate($input['plots']);
 
         return ValuationCalculation::create([
             'tenant_id' => $tenantId,
@@ -174,13 +177,111 @@ class ValuationCalculationService
         ]);
     }
 
+    /**
+     * Weighting resolution order, most specific wins:
+     *   1. Explicit government_weight_pct/market_weight_pct in THIS request
+     *      (a valuer overriding for one specific calculation)
+     *   2. The assignment's client's configured convention (a bank's own
+     *      standing guideline -- see clients.land_rate_government_weight_pct)
+     *   3. WeightedLandRateEngine's own constructor default (30/70)
+     *
+     * Real reference documents showed three different bank conventions
+     * (30/70, 70/30, 20/80) -- none of them is "the" default, so this
+     * resolution order is what keeps the right one applied per bank
+     * without a valuer having to remember and retype it every time.
+     */
+    private function resolveWeightedLandRateEngine(string $assignmentId, array $input): WeightedLandRateEngine
+    {
+        if (isset($input['government_weight_pct'], $input['market_weight_pct'])) {
+            return new WeightedLandRateEngine(
+                governmentWeightPct: (float) $input['government_weight_pct'],
+                marketWeightPct: (float) $input['market_weight_pct'],
+            );
+        }
+
+        $assignment = ValuationAssignment::find($assignmentId);
+        $client = $assignment?->client;
+
+        if ($client !== null && $client->land_rate_government_weight_pct !== null && $client->land_rate_market_weight_pct !== null) {
+            return new WeightedLandRateEngine(
+                governmentWeightPct: (float) $client->land_rate_government_weight_pct,
+                marketWeightPct: (float) $client->land_rate_market_weight_pct,
+            );
+        }
+
+        $tenant = $assignment?->tenant;
+
+        if ($tenant !== null && $tenant->default_land_rate_government_weight_pct !== null && $tenant->default_land_rate_market_weight_pct !== null) {
+            return new WeightedLandRateEngine(
+                governmentWeightPct: (float) $tenant->default_land_rate_government_weight_pct,
+                marketWeightPct: (float) $tenant->default_land_rate_market_weight_pct,
+            );
+        }
+
+        return $this->weightedLandRateEngine;
+    }
+
+    private function resolveVehicleValuationEngine(string $assignmentId, array $input): VehicleValuationEngine
+    {
+        if (isset($input['scrap_pct'], $input['depreciation_pct_per_annum'], $input['other_cost_pct_per_annum'])) {
+            return new VehicleValuationEngine(
+                scrapDeductionPct: (float) $input['scrap_pct'],
+                depreciationPctPerAnnum: (float) $input['depreciation_pct_per_annum'],
+                otherCostPctPerAnnum: (float) $input['other_cost_pct_per_annum'],
+            );
+        }
+
+        $tenant = ValuationAssignment::find($assignmentId)?->tenant;
+
+        if ($tenant !== null
+            && $tenant->default_vehicle_scrap_pct !== null
+            && $tenant->default_vehicle_depreciation_pct_per_annum !== null
+            && $tenant->default_vehicle_other_cost_pct_per_annum !== null
+        ) {
+            return new VehicleValuationEngine(
+                scrapDeductionPct: (float) $tenant->default_vehicle_scrap_pct,
+                depreciationPctPerAnnum: (float) $tenant->default_vehicle_depreciation_pct_per_annum,
+                otherCostPctPerAnnum: (float) $tenant->default_vehicle_other_cost_pct_per_annum,
+            );
+        }
+
+        return $this->vehicleValuationEngine;
+    }
+
+    private function resolveBuildingCostEstimationEngine(string $assignmentId, array $input): BuildingCostEstimationEngine
+    {
+        if (isset($input['sanitary_fixture_pct'], $input['electrical_fixture_pct'], $input['depreciation_pct_per_annum'])) {
+            return new BuildingCostEstimationEngine(
+                sanitaryFixturePct: (float) $input['sanitary_fixture_pct'],
+                electricalFixturePct: (float) $input['electrical_fixture_pct'],
+                depreciationPctPerAnnum: (float) $input['depreciation_pct_per_annum'],
+            );
+        }
+
+        $tenant = ValuationAssignment::find($assignmentId)?->tenant;
+
+        if ($tenant !== null
+            && $tenant->default_building_sanitary_fixture_pct !== null
+            && $tenant->default_building_electrical_fixture_pct !== null
+            && $tenant->default_building_depreciation_pct_per_annum !== null
+        ) {
+            return new BuildingCostEstimationEngine(
+                sanitaryFixturePct: (float) $tenant->default_building_sanitary_fixture_pct,
+                electricalFixturePct: (float) $tenant->default_building_electrical_fixture_pct,
+                depreciationPctPerAnnum: (float) $tenant->default_building_depreciation_pct_per_annum,
+            );
+        }
+
+        return $this->buildingCostEstimationEngine;
+    }
+
     public function runVehicleValuation(
         string $tenantId,
         string $assignmentId,
         array $input,
         ?string $calculatedByUserId,
     ): ValuationCalculation {
-        $result = $this->vehicleValuationEngine->calculate(
+        $result = $this->resolveVehicleValuationEngine($assignmentId, $input)->calculate(
             currentMarketPriceOfNew: (float) $input['current_market_price_of_new'],
             ageYears: (float) $input['age_years'],
             otherReducingFactors: (float) ($input['other_reducing_factors'] ?? 0),
@@ -194,6 +295,34 @@ class ValuationCalculationService
             'status' => 'draft',
             'input_snapshot' => $input,
             'computed_value' => $result['net_fair_market_value'],
+            'computed_details' => $result,
+            'calculated_by_user_id' => $calculatedByUserId,
+            'calculated_at' => now(),
+        ]);
+    }
+
+    public function runBuildingCostEstimation(
+        string $tenantId,
+        string $assignmentId,
+        ?string $propertyId,
+        ?string $buildingId,
+        array $input,
+        ?string $calculatedByUserId,
+    ): ValuationCalculation {
+        $result = $this->resolveBuildingCostEstimationEngine($assignmentId, $input)->calculate(
+            floors: $input['floors'],
+            ageYears: (float) $input['age_years'],
+        );
+
+        return ValuationCalculation::create([
+            'tenant_id' => $tenantId,
+            'valuation_assignment_id' => $assignmentId,
+            'property_id' => $propertyId,
+            'building_id' => $buildingId,
+            'method' => 'building_cost_estimation',
+            'status' => 'draft',
+            'input_snapshot' => $input,
+            'computed_value' => $result['actual_construction_cost'],
             'computed_details' => $result,
             'calculated_by_user_id' => $calculatedByUserId,
             'calculated_at' => now(),
