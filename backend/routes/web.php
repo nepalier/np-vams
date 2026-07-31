@@ -20,6 +20,9 @@ Route::get('/properties/{id}', fn (string $id) => Inertia::render('Properties/Sh
 Route::get('/invoices', fn () => Inertia::render('Invoices/Index'));
 Route::get('/settings', fn () => Inertia::render('Settings/Index'));
 Route::get('/parties', fn () => Inertia::render('Parties/Index'));
+Route::get('/portal', fn () => Inertia::render('Portal/Dashboard'));
+Route::get('/portal/assignments', fn () => Inertia::render('Portal/Assignments'));
+Route::get('/portal/invoices', fn () => Inertia::render('Portal/Invoices'));
 Route::get('/login', fn () => Inertia::render('Auth/Login'))->name('login');
 
 // API documentation (Section 40: "Generate complete OpenAPI or Swagger

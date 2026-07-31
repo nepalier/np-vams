@@ -24,7 +24,7 @@ async function submit() {
 
     const { data } = await response.json();
     localStorage.setItem('npvams_token', data.token);
-    window.location.href = '/';
+    window.location.href = data.user?.is_client_portal_user ? '/portal' : '/';
   } finally {
     submitting.value = false;
   }

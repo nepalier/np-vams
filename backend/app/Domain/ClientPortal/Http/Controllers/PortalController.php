@@ -32,6 +32,7 @@ class PortalController
     public function assignments(Request $request): JsonResponse
     {
         $assignments = ValuationAssignment::query()
+            ->with(['client', 'valuationPurpose'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->orderByDesc('created_at')
             ->paginate($request->integer('per_page', 20));

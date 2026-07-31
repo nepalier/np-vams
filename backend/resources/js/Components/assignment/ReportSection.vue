@@ -12,6 +12,7 @@ const error = ref<string | null>(null);
 const submitting = ref(false);
 const showReasonFor = ref<'cancel' | 'supersede' | null>(null);
 const reason = ref('');
+const selectedTemplate = ref<'default' | 'bank_standard_np'>('bank_standard_np');
 
 async function load() {
   loading.value = true;
@@ -74,11 +75,19 @@ onMounted(load);
         </span>
       </div>
 
+      <div class="mb-2 text-sm">
+        <label class="text-xs text-gray-500 mr-2">Report Template</label>
+        <select v-model="selectedTemplate" class="border rounded px-2 py-1 text-xs">
+          <option value="bank_standard_np">Bank Standard (Nepal)</option>
+          <option value="default">Default</option>
+        </select>
+      </div>
+
       <div class="flex flex-wrap gap-2">
         <button
           :disabled="submitting"
           class="px-3 py-1.5 text-sm border rounded hover:bg-brand-50 disabled:opacity-40"
-          @click="runAction('generate-draft')"
+          @click="runAction('generate-draft', { template: selectedTemplate })"
         >{{ report ? 'Regenerate Draft' : 'Generate Draft' }}</button>
 
         <button

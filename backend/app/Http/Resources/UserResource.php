@@ -19,6 +19,8 @@ class UserResource extends JsonResource
             'mobile' => $this->mobile,
             'organization_id' => $this->organization_id,
             'organization_branch_id' => $this->organization_branch_id,
+            'client_id' => $this->client_id,
+            'is_client_portal_user' => $this->isClientPortalUser(),
             'roles' => $this->getRoleNames(),
             'permissions' => $this->getAllPermissions()->pluck('name'),
             'mfa_enabled' => (bool) $this->mfa_enabled,
