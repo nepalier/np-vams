@@ -8,7 +8,7 @@ interface PropertyOption { id: string; name_en: string; }
 const clients = ref<Option[]>([]);
 const purposes = ref<Option[]>([]);
 const properties = ref<PropertyOption[]>([]);
-
+const borrowers = ref<PropertyOption[]>([]);
 const loadingOptions = ref(true);
 const submitting = ref(false);
 const error = ref<string | null>(null);
@@ -20,6 +20,7 @@ const form = ref({
   requested_completion_date: '',
   priority: 'normal',
   requested_loan_amount: null as number | null,
+  borrower_id: '' as string,
   contact_person: '',
   client_remarks: '',
   property_ids: [] as string[],
@@ -28,14 +29,16 @@ const form = ref({
 async function loadOptions() {
   loadingOptions.value = true;
   try {
-    const [clientsRes, purposesRes, propertiesRes] = await Promise.all([
+    const [clientsRes, purposesRes, propertiesRes, borrowersRes] = await Promise.all([
       apiFetch<{ data: Array<{ id: string; name_en: string }> }>('/api/v1/clients?per_page=100'),
       apiFetch<{ data: Option[] }>('/api/v1/master-data/valuation-purposes'),
       apiFetch<{ data: Array<{ id: string; property_name: string | null; property_code: string }> }>('/api/v1/properties?per_page=100'),
+      apiFetch<{ data: Array<{ id: string; name_en: string }> }>('/api/v1/borrowers?per_page=100'),
     ]);
     clients.value = clientsRes.data;
     purposes.value = purposesRes.data;
     properties.value = propertiesRes.data.map((p) => ({ id: p.id, name_en: p.property_name ?? p.property_code }));
+    borrowers.value = borrowersRes.data;
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to load form options.';
   } finally {
@@ -57,9 +60,10 @@ async function submit() {
   error.value = null;
 
   try {
+    const payload = { ...form.value, borrower_id: form.value.borrower_id || null };
     const result = await apiFetch<{ data: { id: string } }>('/api/v1/assignments', {
       method: 'POST',
-      body: JSON.stringify(form.value),
+      body: JSON.stringify(payload),
     });
     window.location.href = `/assignments/${result.data.id}`;
   } catch (e) {
@@ -123,10 +127,21 @@ onMounted(loadOptions);
           <label class="block text-xs text-gray-500 mb-1">Requested Loan Amount</label>
           <input v-model.number="form.requested_loan_amount" type="number" class="border rounded px-2 py-1.5 w-full" />
         </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Borrower</label>
+          <select v-model="form.borrower_id" class="border rounded px-2 py-1.5 w-full">
+            <option value="">— None —</option>
+            <option v-for="b in borrowers" :key="b.id" :value="b.id">{{ b.name_en }}</option>
+          </select>
+        </div>
         <div class="col-span-2">
           <label class="block text-xs text-gray-500 mb-1">Contact Person</label>
           <input v-model="form.contact_person" type="text" class="border rounded px-2 py-1.5 w-full" />
         </div>
+      </div>
+
+      <div v-if="borrowers.length === 0" class="text-xs text-amber-600 -mt-2">
+        No borrowers recorded yet. <a href="/parties" class="underline">Add one</a> if this assignment needs one.
       </div>
 
       <div>

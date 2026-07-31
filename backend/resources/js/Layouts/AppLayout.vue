@@ -15,6 +15,7 @@ const page = usePage<{ auth?: { user: AuthUser } }>();
           <a href="/assignments" class="hover:text-white">Assignments</a>
           <a href="/clients" class="hover:text-white">Clients</a>
           <a href="/properties" class="hover:text-white">Properties</a>
+          <a href="/parties" class="hover:text-white">Parties</a>
           <a href="/invoices" class="hover:text-white">Invoices</a>
           <a href="/settings" class="hover:text-white">Settings</a>
         </nav>

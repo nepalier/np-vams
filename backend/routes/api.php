@@ -13,6 +13,8 @@ use App\Domain\ClientPortal\Http\Controllers\PortalController;
 use App\Domain\Dashboard\Http\Controllers\DashboardController;
 use App\Domain\Gis\Http\Controllers\GisExportController;
 use App\Domain\MasterData\Http\Controllers\MasterDataController;
+use App\Domain\Party\Http\Controllers\BorrowerController;
+use App\Domain\Party\Http\Controllers\PropertyOwnerController;
 use App\Domain\Property\Http\Controllers\LandParcelCharacteristicsController;
 use App\Domain\Property\Http\Controllers\LandParcelController;
 use App\Domain\Property\Http\Controllers\PropertyController;
@@ -56,6 +58,14 @@ Route::prefix('v1')->group(function () {
         Route::get('/master-data/property-types', [MasterDataController::class, 'propertyTypes']);
         Route::get('/master-data/area-units', [MasterDataController::class, 'areaUnits']);
         Route::get('/master-data/districts', [MasterDataController::class, 'districts']);
+
+        Route::get('/borrowers', [BorrowerController::class, 'index']);
+        Route::post('/borrowers', [BorrowerController::class, 'store']);
+        Route::get('/borrowers/{borrower}', [BorrowerController::class, 'show']);
+
+        Route::get('/property-owners', [PropertyOwnerController::class, 'index']);
+        Route::post('/property-owners', [PropertyOwnerController::class, 'store']);
+        Route::get('/property-owners/{owner}', [PropertyOwnerController::class, 'show']);
 
         Route::get('/properties', [PropertyController::class, 'index']);
         Route::post('/properties', [PropertyController::class, 'store']);
