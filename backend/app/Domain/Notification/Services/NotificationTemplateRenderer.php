@@ -77,6 +77,46 @@ class NotificationTemplateRenderer
                 'body' => 'असाइनमेन्ट {{assignment_number}} को पुनर्मूल्याङ्कन अवधि पुगेको छ। आवश्यक भएमा कृपया नयाँ पुनर्मूल्याङ्कन असाइनमेन्ट सुरु गर्नुहोस्।',
             ],
         ],
+        'site_visit_scheduled' => [
+            'en' => [
+                'subject' => 'Site visit scheduled — {{assignment_number}}',
+                'body' => 'A site visit has been scheduled for assignment {{assignment_number}}. Please review the scheduled date and prepare accordingly.',
+            ],
+            'ne' => [
+                'subject' => 'साइट भ्रमण तालिका बनाइयो — {{assignment_number}}',
+                'body' => 'असाइनमेन्ट {{assignment_number}} को लागि साइट भ्रमण तालिका बनाइएको छ। कृपया तोकिएको मिति समीक्षा गरी तयारी गर्नुहोस्।',
+            ],
+        ],
+        'inspection_completed' => [
+            'en' => [
+                'subject' => 'Field inspection completed — {{assignment_number}}',
+                'body' => 'Field inspection for assignment {{assignment_number}} has been completed. Technical review can now proceed.',
+            ],
+            'ne' => [
+                'subject' => 'फिल्ड निरीक्षण सम्पन्न — {{assignment_number}}',
+                'body' => 'असाइनमेन्ट {{assignment_number}} को फिल्ड निरीक्षण सम्पन्न भएको छ। अब प्राविधिक समीक्षा अगाडि बढाउन सकिन्छ।',
+            ],
+        ],
+        'cancelled' => [
+            'en' => [
+                'subject' => 'Assignment cancelled — {{assignment_number}}',
+                'body' => 'Assignment {{assignment_number}} has been cancelled. Remarks: {{remarks}}',
+            ],
+            'ne' => [
+                'subject' => 'असाइनमेन्ट रद्द गरियो — {{assignment_number}}',
+                'body' => 'असाइनमेन्ट {{assignment_number}} रद्द गरिएको छ। टिप्पणी: {{remarks}}',
+            ],
+        ],
+        'superseded' => [
+            'en' => [
+                'subject' => 'Report superseded — {{assignment_number}}',
+                'body' => 'The report for assignment {{assignment_number}} has been superseded. Remarks: {{remarks}}',
+            ],
+            'ne' => [
+                'subject' => 'प्रतिवेदन प्रतिस्थापित गरियो — {{assignment_number}}',
+                'body' => 'असाइनमेन्ट {{assignment_number}} को प्रतिवेदन प्रतिस्थापित गरिएको छ। टिप्पणी: {{remarks}}',
+            ],
+        ],
     ];
 
     /**

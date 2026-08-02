@@ -12,11 +12,16 @@ use App\Domain\Workflow\Models\WorkflowTransition;
 use App\Models\User;
 
 /**
- * Reference wiring for 6 of the ~18 lifecycle events in Section 36
+ * Reference wiring for 10 of the ~18 lifecycle events in Section 36
  * (report_issued, correction_requested, valuer_assigned, awaiting_approval,
- * approved, revaluation_due). The remaining events follow this identical
- * "on WorkflowTransition created, look at new_status, notify the relevant
- * assignee" shape.
+ * approved, revaluation_due, site_visit_scheduled, inspection_completed,
+ * cancelled, superseded). The remaining events (invoice_issued,
+ * payment_overdue, registration_expiring, document_missing, assignment_
+ * rejected, clarification_required) need a different trigger mechanism
+ * than this observer -- most are tied to the Invoice/Payment models or a
+ * scheduled command (checking license expiry, overdue invoices), not a
+ * ValuationAssignment workflow transition -- flagged here rather than
+ * forced into this class's shape where they don't actually fit.
  */
 class WorkflowTransitionObserver
 {
@@ -39,6 +44,22 @@ class WorkflowTransitionObserver
             'awaiting_approval' => $this->notify($assignment->assigned_approver_id, new AssignmentWorkflowNotification($assignment, 'awaiting_approval')),
             'approved' => $this->notify($assignment->assigned_valuer_id, new AssignmentWorkflowNotification($assignment, 'approved')),
             'revaluation_due' => $this->notify($assignment->assigned_valuer_id, new AssignmentWorkflowNotification($assignment, 'revaluation_due')),
+            'site_visit_scheduled' => $this->notify(
+                $assignment->assigned_surveyor_id ?? $assignment->assigned_valuer_id,
+                new AssignmentWorkflowNotification($assignment, 'site_visit_scheduled'),
+            ),
+            'inspection_completed' => $this->notify(
+                $assignment->assigned_reviewer_id ?? $assignment->assigned_valuer_id,
+                new AssignmentWorkflowNotification($assignment, 'inspection_completed'),
+            ),
+            'cancelled' => $this->notify(
+                $assignment->assigned_valuer_id,
+                new AssignmentWorkflowNotification($assignment, 'cancelled', ['remarks' => $transition->remarks ?? '']),
+            ),
+            'superseded' => $this->notify(
+                $assignment->assigned_valuer_id,
+                new AssignmentWorkflowNotification($assignment, 'superseded', ['remarks' => $transition->remarks ?? '']),
+            ),
             default => null,
         };
     }

@@ -48,14 +48,44 @@ test('transitioning to valuer_assigned notifies the assigned valuer', function (
     );
 });
 
-test('a transition with no wired notification does not error and simply sends nothing', function () {
+test('a user who is not anyone\'s assignee never receives a notification, regardless of how many events are wired', function () {
     Notification::fake();
 
     $staffUser = User::factory()->create(['tenant_id' => $this->tenant->id]);
 
     app(WorkflowEngine::class)->transition($this->assignment, 'valuer_assigned', $staffUser);
 
-    // valuer_assigned -> site_visit_scheduled has no wired notification --
-    // proves the observer's default match arm is safe, not just untested.
+    // $staffUser performed the transition but isn't the assignment's
+    // valuer/surveyor/reviewer/approver -- proves recipients are always
+    // resolved from the assignment's own assignee fields, never the
+    // acting user, no matter how many more events get wired over time.
     Notification::assertNothingSentTo($staffUser);
+});
+
+test('transitioning to site_visit_scheduled notifies the assigned surveyor, falling back to the valuer if none is set', function () {
+    Notification::fake();
+
+    $this->assignment->update(['status' => 'valuer_assigned']);
+    $staffUser = User::factory()->create(['tenant_id' => $this->tenant->id]);
+    $staffUser->assignRole('Valuation Firm Administrator');
+
+    app(WorkflowEngine::class)->transition($this->assignment->fresh(), 'site_visit_scheduled', $staffUser);
+
+    // No surveyor was assigned on this assignment -- falls back to the valuer.
+    Notification::assertSentTo($this->valuer, AssignmentWorkflowNotification::class);
+});
+
+test('transitioning to cancelled passes the transition remarks through as a token', function () {
+    Notification::fake();
+
+    $this->assignment->update(['status' => 'awaiting_approval']);
+    $approver = User::factory()->create(['tenant_id' => $this->tenant->id]);
+    $approver->assignRole('Approving Authority');
+
+    app(WorkflowEngine::class)->transition($this->assignment->fresh(), 'cancelled', $approver, 'Client withdrew the application.');
+
+    Notification::assertSentTo(
+        $this->valuer,
+        AssignmentWorkflowNotification::class,
+    );
 });
