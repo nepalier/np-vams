@@ -3,10 +3,11 @@ import { onMounted, ref } from 'vue';
 import { apiFetch } from '../../Composables/useApi';
 import ParcelCharacteristicsPanel from '../../Components/property/ParcelCharacteristicsPanel.vue';
 import BuildingConditionPanel from '../../Components/property/BuildingConditionPanel.vue';
+import PropertyMap from '../../Components/gis/PropertyMap.vue';
 
 const props = defineProps<{ id: string }>();
 
-interface Parcel { id: string; kitta_number: string; area_considered_sqm: number | null; }
+interface Parcel { id: string; kitta_number: string; area_considered_sqm: number | null; boundary_points: Array<{ lat: number; lng: number }> | null; }
 interface Floor { id: string; floor_name: string; floor_number: number; covered_area_sqm: number | null; }
 interface BuildingRecord { id: string; building_name: string | null; number_of_floors: number; structural_system: string | null; floors: Floor[]; }
 interface PropertyDetail {
@@ -67,6 +68,31 @@ async function submitParcel() {
   }
 }
 
+async function downloadAuthenticated(url: string, filename: string) {
+  const token = localStorage.getItem('npvams_token');
+  const response = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+
+  if (!response.ok) {
+    error.value = `Export failed (${response.status}).`;
+    return;
+  }
+
+  const blob = await response.blob();
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+async function exportGeoJson(parcelId: string) {
+  await downloadAuthenticated(`/api/v1/parcels/${parcelId}/export/geojson`, `parcel-${parcelId}.geojson`);
+}
+
+async function exportKml(parcelId: string) {
+  await downloadAuthenticated(`/api/v1/parcels/${parcelId}/export/kml`, `parcel-${parcelId}.kml`);
+}
+
 async function submitBuilding() {
   submittingBuilding.value = true;
   error.value = null;
@@ -97,6 +123,23 @@ onMounted(loadAll);
       <p class="text-gray-500 text-sm mb-6">{{ property.property_code }} · {{ property.address ?? 'No address recorded' }} · {{ property.district_name ?? '—' }}</p>
 
       <div v-if="error" class="bg-red-50 text-red-700 text-sm rounded p-3 mb-4">{{ error }}</div>
+
+      <!-- Map -->
+      <div class="bg-white border rounded p-4 mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-gray-700">Location</h2>
+          <div v-if="parcels[0]" class="flex gap-2">
+            <button class="text-xs text-brand-600" @click="exportGeoJson(parcels[0].id)">Export GeoJSON</button>
+            <button class="text-xs text-brand-600" @click="exportKml(parcels[0].id)">Export KML</button>
+          </div>
+        </div>
+        <PropertyMap
+          :latitude="property.latitude"
+          :longitude="property.longitude"
+          :boundary-points="parcels[0]?.boundary_points ?? null"
+          :property-label="property.property_name ?? property.property_code"
+        />
+      </div>
 
       <!-- Parcels -->
       <div class="bg-white border rounded p-4 mb-6">
