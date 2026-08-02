@@ -137,6 +137,26 @@ class NotificationTemplateRenderer
                 'body' => 'बिजक {{invoice_number}} विरुद्ध रु. {{amount}} भुक्तानी दर्ता गरिएको छ। बाँकी रकम: रु. {{outstanding_amount}}।',
             ],
         ],
+        'payment_overdue' => [
+            'en' => [
+                'subject' => 'Payment overdue — {{invoice_number}}',
+                'body' => 'Invoice {{invoice_number}} was due on {{due_date}} and has an outstanding balance of NRs. {{outstanding_amount}}. Please arrange payment at your earliest convenience.',
+            ],
+            'ne' => [
+                'subject' => 'भुक्तानी ढिलो — {{invoice_number}}',
+                'body' => 'बिजक {{invoice_number}} {{due_date}} मा तिर्नुपर्ने थियो र रु. {{outstanding_amount}} बाँकी छ। कृपया चाँडै भुक्तानी गर्नुहोस्।',
+            ],
+        ],
+        'registration_expiring' => [
+            'en' => [
+                'subject' => 'Your professional registration is expiring soon',
+                'body' => 'Your NEC registration / professional license is due to expire on {{expiry_date}}. Please renew it promptly to avoid disruption to your assignments.',
+            ],
+            'ne' => [
+                'subject' => 'तपाईंको व्यावसायिक दर्ता चाँडै समाप्त हुँदैछ',
+                'body' => 'तपाईंको NEC दर्ता/व्यावसायिक इजाजतपत्र {{expiry_date}} मा समाप्त हुँदैछ। असाइनमेन्टमा अवरोध नहोस् भनेर कृपया चाँडै नवीकरण गर्नुहोस्।',
+            ],
+        ],
     ];
 
     /**
