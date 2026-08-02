@@ -96,6 +96,61 @@ function removePlot(i: number) {
   plots.value.splice(i, 1);
 }
 
+// Government-rate lookup: a shared fiscal year + district picked once,
+// used to suggest a rate per plot row rather than the valuer typing it
+// in from memory every time (Section 20's government rate database,
+// wired in end-to-end for the first time here).
+interface LookupOption { id: number; code_bs?: string; name_en?: string; }
+const fiscalYears = ref<LookupOption[]>([]);
+const districts = ref<LookupOption[]>([]);
+const lookupFiscalYearId = ref<number | ''>('');
+const lookupDistrictId = ref<number | ''>('');
+const lookupLoaded = ref(false);
+const suggestingForRow = ref<number | null>(null);
+
+async function loadLookupOptions() {
+  if (lookupLoaded.value) return;
+  lookupLoaded.value = true;
+
+  try {
+    const [fyRes, districtRes] = await Promise.all([
+      apiFetch<{ data: LookupOption[] }>('/api/v1/master-data/fiscal-years'),
+      apiFetch<{ data: LookupOption[] }>('/api/v1/master-data/districts'),
+    ]);
+    fiscalYears.value = fyRes.data;
+    districts.value = districtRes.data;
+    const current = fyRes.data.find((fy: any) => fy.is_current);
+    if (current) lookupFiscalYearId.value = current.id;
+  } catch {
+    // Non-fatal -- the plot rows still work with manual entry if this lookup data fails to load.
+  }
+}
+
+async function suggestGovernmentRate(rowIndex: number) {
+  if (!lookupFiscalYearId.value || !lookupDistrictId.value) {
+    error.value = 'Select a fiscal year and district above first.';
+    return;
+  }
+
+  suggestingForRow.value = rowIndex;
+  error.value = null;
+
+  try {
+    const result = await apiFetch<{ data: { minimum_rate: string } | null }>(
+      `/api/v1/government-land-rates/suggested?fiscal_year_id=${lookupFiscalYearId.value}&district_id=${lookupDistrictId.value}`,
+    );
+    if (result.data) {
+      plots.value[rowIndex].government_rate = Number(result.data.minimum_rate);
+    } else {
+      error.value = 'No government rate found for this fiscal year and district. Enter it manually.';
+    }
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Lookup failed.';
+  } finally {
+    suggestingForRow.value = null;
+  }
+}
+
 async function submitWeightedLandRate() {
   submitting.value = true;
   error.value = null;
@@ -151,7 +206,7 @@ function formatCurrency(value: string | number): string {
       >Cost Approach</button>
       <button
         :class="['px-3 py-1 rounded', activeTab === 'weighted_land_rate' ? 'bg-brand-600 text-white' : 'bg-gray-100']"
-        @click="activeTab = 'weighted_land_rate'"
+        @click="activeTab = 'weighted_land_rate'; loadLookupOptions()"
       >Weighted Land Rate</button>
       <button
         :class="['px-3 py-1 rounded', activeTab === 'vehicle' ? 'bg-brand-600 text-white' : 'bg-gray-100']"
@@ -248,6 +303,23 @@ function formatCurrency(value: string | number): string {
 
     <!-- Weighted Land Rate (30% government / 70% market -- standard Nepali bank convention) -->
     <div v-else-if="activeTab === 'weighted_land_rate'" class="space-y-3">
+      <div class="border rounded p-3 bg-gray-50 flex gap-2 items-end text-sm">
+        <div>
+          <label class="block text-xs text-gray-500">Fiscal Year (for rate lookup)</label>
+          <select v-model="lookupFiscalYearId" class="border rounded px-2 py-1">
+            <option value="">—</option>
+            <option v-for="fy in fiscalYears" :key="fy.id" :value="fy.id">{{ fy.code_bs }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500">District (for rate lookup)</label>
+          <select v-model="lookupDistrictId" class="border rounded px-2 py-1">
+            <option value="">—</option>
+            <option v-for="d in districts" :key="d.id" :value="d.id">{{ d.name_en }}</option>
+          </select>
+        </div>
+      </div>
+
       <div v-for="(plot, i) in plots" :key="i" class="border rounded p-3">
         <div class="flex justify-between items-center mb-2">
           <span class="text-xs font-medium text-gray-500">Plot #{{ i + 1 }}</span>
@@ -264,7 +336,15 @@ function formatCurrency(value: string | number): string {
           </div>
           <div>
             <label class="block text-xs text-gray-500">Government Rate (per unit)</label>
-            <input v-model.number="plot.government_rate" type="number" class="border rounded px-2 py-1 w-full" />
+            <div class="flex gap-1">
+              <input v-model.number="plot.government_rate" type="number" class="border rounded px-2 py-1 w-full" />
+              <button
+                type="button"
+                :disabled="suggestingForRow === i"
+                class="text-xs text-brand-600 whitespace-nowrap px-1"
+                @click="suggestGovernmentRate(i)"
+              >{{ suggestingForRow === i ? '…' : 'Suggest' }}</button>
+            </div>
           </div>
           <div>
             <label class="block text-xs text-gray-500">Market Rate (per unit)</label>

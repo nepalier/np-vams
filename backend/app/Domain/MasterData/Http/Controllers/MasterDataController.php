@@ -6,6 +6,7 @@ namespace App\Domain\MasterData\Http\Controllers;
 
 use App\Domain\MasterData\Models\AreaUnit;
 use App\Domain\MasterData\Models\District;
+use App\Domain\MasterData\Models\FiscalYear;
 use App\Domain\MasterData\Models\PropertyType;
 use App\Domain\MasterData\Models\ValuationPurpose;
 use Illuminate\Http\JsonResponse;
@@ -37,5 +38,10 @@ class MasterDataController
     public function districts(): JsonResponse
     {
         return response()->json(['data' => District::orderBy('name_en')->get(['id', 'province_id', 'name_en', 'name_ne'])]);
+    }
+
+    public function fiscalYears(): JsonResponse
+    {
+        return response()->json(['data' => FiscalYear::orderByDesc('starts_on')->get(['id', 'code_bs', 'is_current'])]);
     }
 }

@@ -63,6 +63,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/master-data/property-types', [MasterDataController::class, 'propertyTypes']);
         Route::get('/master-data/area-units', [MasterDataController::class, 'areaUnits']);
         Route::get('/master-data/districts', [MasterDataController::class, 'districts']);
+        Route::get('/master-data/fiscal-years', [MasterDataController::class, 'fiscalYears']);
 
         Route::get('/professional-profile', [ProfessionalProfileController::class, 'show']);
         Route::put('/professional-profile', [ProfessionalProfileController::class, 'update']);
