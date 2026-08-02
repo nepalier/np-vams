@@ -8,6 +8,7 @@ use App\Domain\Billing\Http\Controllers\InvoiceController;
 use App\Domain\Building\Http\Controllers\BuildingConditionAssessmentController;
 use App\Domain\Building\Http\Controllers\BuildingController;
 use App\Domain\Client\Http\Controllers\ClientController;
+use App\Domain\Document\Http\Controllers\DocumentController;
 use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
 use App\Domain\ClientPortal\Http\Controllers\PortalController;
 use App\Domain\Dashboard\Http\Controllers\DashboardController;
@@ -64,6 +65,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/professional-profile', [ProfessionalProfileController::class, 'show']);
         Route::put('/professional-profile', [ProfessionalProfileController::class, 'update']);
         Route::get('/professional-profiles', [ProfessionalProfileController::class, 'index']);
+
+        Route::get('/assignments/{assignment}/documents', [DocumentController::class, 'index']);
+        Route::post('/assignments/{assignment}/documents', [DocumentController::class, 'store']);
+        Route::put('/documents/{document}/verification', [DocumentController::class, 'updateVerification']);
 
         Route::get('/borrowers', [BorrowerController::class, 'index']);
         Route::post('/borrowers', [BorrowerController::class, 'store']);
