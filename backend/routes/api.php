@@ -15,10 +15,12 @@ use App\Domain\Dashboard\Http\Controllers\DashboardController;
 use App\Domain\Gis\Http\Controllers\GisExportController;
 use App\Domain\MasterData\Http\Controllers\MasterDataController;
 use App\Domain\Party\Http\Controllers\BorrowerController;
+use App\Domain\Party\Http\Controllers\GuarantorController;
 use App\Domain\Party\Http\Controllers\PropertyOwnerController;
 use App\Domain\Property\Http\Controllers\LandParcelCharacteristicsController;
 use App\Domain\Property\Http\Controllers\LandParcelController;
 use App\Domain\Property\Http\Controllers\PropertyController;
+use App\Domain\Rates\Http\Controllers\GovernmentLandRateController;
 use App\Domain\Professional\Http\Controllers\ProfessionalProfileController;
 use App\Domain\Settings\Http\Controllers\TenantSettingsController;
 use App\Domain\Report\Http\Controllers\QrVerificationController;
@@ -70,9 +72,16 @@ Route::prefix('v1')->group(function () {
         Route::post('/assignments/{assignment}/documents', [DocumentController::class, 'store']);
         Route::put('/documents/{document}/verification', [DocumentController::class, 'updateVerification']);
 
+        Route::get('/government-land-rates', [GovernmentLandRateController::class, 'index']);
+        Route::post('/government-land-rates', [GovernmentLandRateController::class, 'store']);
+        Route::post('/government-land-rates/{governmentLandRate}/new-version', [GovernmentLandRateController::class, 'createNewVersion']);
+        Route::get('/government-land-rates/suggested', [GovernmentLandRateController::class, 'suggestedRate']);
+
         Route::get('/borrowers', [BorrowerController::class, 'index']);
         Route::post('/borrowers', [BorrowerController::class, 'store']);
         Route::get('/borrowers/{borrower}', [BorrowerController::class, 'show']);
+        Route::get('/borrowers/{borrower}/guarantors', [GuarantorController::class, 'index']);
+        Route::post('/borrowers/{borrower}/guarantors', [GuarantorController::class, 'store']);
 
         Route::get('/property-owners', [PropertyOwnerController::class, 'index']);
         Route::post('/property-owners', [PropertyOwnerController::class, 'store']);
