@@ -8,6 +8,7 @@ use App\Domain\Billing\Http\Controllers\InvoiceController;
 use App\Domain\Building\Http\Controllers\BuildingConditionAssessmentController;
 use App\Domain\Building\Http\Controllers\BuildingController;
 use App\Domain\Client\Http\Controllers\ClientController;
+use App\Domain\Comparable\Http\Controllers\ComparablePropertyController;
 use App\Domain\Document\Http\Controllers\DocumentController;
 use App\Domain\ClientPortal\Http\Controllers\ClientPortalUserController;
 use App\Domain\ClientPortal\Http\Controllers\PortalController;
@@ -77,6 +78,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/government-land-rates', [GovernmentLandRateController::class, 'store']);
         Route::post('/government-land-rates/{governmentLandRate}/new-version', [GovernmentLandRateController::class, 'createNewVersion']);
         Route::get('/government-land-rates/suggested', [GovernmentLandRateController::class, 'suggestedRate']);
+
+        Route::get('/comparable-properties', [ComparablePropertyController::class, 'index']);
+        Route::post('/comparable-properties', [ComparablePropertyController::class, 'store']);
+        Route::get('/comparable-properties/nearby', [ComparablePropertyController::class, 'nearby']);
+        Route::get('/comparable-properties/{comparable}', [ComparablePropertyController::class, 'show']);
 
         Route::get('/borrowers', [BorrowerController::class, 'index']);
         Route::post('/borrowers', [BorrowerController::class, 'store']);
