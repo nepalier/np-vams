@@ -21,6 +21,7 @@ Route::get('/invoices', fn () => Inertia::render('Invoices/Index'));
 Route::get('/settings', fn () => Inertia::render('Settings/Index'));
 Route::get('/profile', fn () => Inertia::render('Profile/Index'));
 Route::get('/parties', fn () => Inertia::render('Parties/Index'));
+Route::get('/comparables', fn () => Inertia::render('Comparables/Index'));
 Route::get('/portal', fn () => Inertia::render('Portal/Dashboard'));
 Route::get('/portal/assignments', fn () => Inertia::render('Portal/Assignments'));
 Route::get('/portal/invoices', fn () => Inertia::render('Portal/Invoices'));

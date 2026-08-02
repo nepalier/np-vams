@@ -27,6 +27,52 @@ function removeComparable(index: number) {
   comparables.value.splice(index, 1);
 }
 
+// -- Nearby comparable search (Section 21/22's actual intended workflow:
+// find recorded market data physically near the subject property,
+// rather than typing rates in from memory) --
+interface NearbyComparable { id: string; location: string; unit_rate: string; reliability_grade: string; distance_m: number; }
+const nearbySearchLat = ref<number | null>(null);
+const nearbySearchLng = ref<number | null>(null);
+const nearbyRadiusKm = ref(2);
+const nearbyResults = ref<NearbyComparable[] | null>(null);
+const searchingNearby = ref(false);
+
+function useMyLocationForSearch() {
+  if (!navigator.geolocation) {
+    error.value = 'GPS is not available in this browser.';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition((position) => {
+    nearbySearchLat.value = position.coords.latitude;
+    nearbySearchLng.value = position.coords.longitude;
+  });
+}
+
+async function searchNearbyComparables() {
+  if (nearbySearchLat.value === null || nearbySearchLng.value === null) {
+    error.value = 'Enter or capture a location first.';
+    return;
+  }
+
+  searchingNearby.value = true;
+  error.value = null;
+
+  try {
+    const result = await apiFetch<{ data: NearbyComparable[] }>(
+      `/api/v1/comparable-properties/nearby?latitude=${nearbySearchLat.value}&longitude=${nearbySearchLng.value}&radius_km=${nearbyRadiusKm.value}`,
+    );
+    nearbyResults.value = result.data;
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Search failed.';
+  } finally {
+    searchingNearby.value = false;
+  }
+}
+
+function addComparableFromNearby(nc: NearbyComparable) {
+  comparables.value.push({ base_rate: Number(nc.unit_rate), time_pct: 0, location_pct: 0, road_width_pct: 0, corner_plot_pct: 0 });
+}
+
 async function submitMarketComparison() {
   submitting.value = true;
   error.value = null;
@@ -218,6 +264,38 @@ function formatCurrency(value: string | number): string {
 
     <!-- Market Comparison -->
     <div v-if="activeTab === 'market_comparison'" class="space-y-3">
+      <div class="border rounded p-3 bg-gray-50 text-sm">
+        <p class="text-xs text-gray-500 mb-2">Find recorded comparable properties near the subject property, instead of typing rates from memory.</p>
+        <div class="flex gap-2 items-end flex-wrap">
+          <div>
+            <label class="block text-xs text-gray-500">Latitude</label>
+            <input v-model.number="nearbySearchLat" type="number" step="0.000001" class="border rounded px-2 py-1 w-32" />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500">Longitude</label>
+            <input v-model.number="nearbySearchLng" type="number" step="0.000001" class="border rounded px-2 py-1 w-32" />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500">Radius (km)</label>
+            <input v-model.number="nearbyRadiusKm" type="number" step="0.5" class="border rounded px-2 py-1 w-20" />
+          </div>
+          <button class="text-xs text-brand-600 px-2 py-1" @click="useMyLocationForSearch">Use My Location</button>
+          <button :disabled="searchingNearby" class="px-3 py-1 bg-brand-600 text-white rounded text-xs disabled:opacity-40" @click="searchNearbyComparables">
+            {{ searchingNearby ? 'Searching…' : 'Search' }}
+          </button>
+        </div>
+
+        <div v-if="nearbyResults" class="mt-2">
+          <p v-if="nearbyResults.length === 0" class="text-xs text-gray-400">No recorded comparables within this radius.</p>
+          <div v-else class="space-y-1">
+            <div v-for="nc in nearbyResults" :key="nc.id" class="flex items-center justify-between text-xs bg-white border rounded px-2 py-1">
+              <span>{{ nc.location }} — Rs. {{ Number(nc.unit_rate).toLocaleString() }} (Grade {{ nc.reliability_grade }}, {{ (nc.distance_m / 1000).toFixed(2) }} km away)</span>
+              <button class="text-brand-600" @click="addComparableFromNearby(nc)">+ Add as comparable</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div v-for="(row, i) in comparables" :key="i" class="border rounded p-3">
         <div class="flex justify-between items-center mb-2">
           <span class="text-xs font-medium text-gray-500">Comparable #{{ i + 1 }}</span>
