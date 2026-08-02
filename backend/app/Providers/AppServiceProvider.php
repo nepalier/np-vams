@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Domain\Assignment\Models\ValuationAssignment;
 use App\Domain\Assignment\Policies\AssignmentPolicy;
+use App\Domain\Billing\Models\Invoice;
+use App\Domain\Notification\Listeners\InvoiceObserver;
 use App\Domain\Notification\Listeners\WorkflowTransitionObserver;
 use App\Domain\Workflow\Models\WorkflowTransition;
 use App\Models\Organization;
@@ -36,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         WorkflowTransition::observe(WorkflowTransitionObserver::class);
+        Invoice::observe(InvoiceObserver::class);
 
         // Super Administrator / Platform Administrator bypass all ability
         // checks, but ONLY for platform-level abilities -- tenant-scoped

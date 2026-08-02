@@ -9,6 +9,8 @@ use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\InvoiceItem;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\MasterData\Models\FiscalYear;
+use App\Domain\Notification\Listeners\InvoiceObserver;
+use App\Domain\Notification\Notifications\InvoiceEventNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -18,6 +20,7 @@ class BillingService
     public function __construct(
         private readonly InvoiceCalculationService $calculationService,
         private readonly InvoiceNumberGenerator $numberGenerator,
+        private readonly InvoiceObserver $invoiceObserver,
     ) {}
 
     /**
@@ -111,6 +114,19 @@ class BillingService
 
             $invoice->increment('paid_amount', $amount);
             $this->refreshOutstandingAndStatus($invoice->fresh());
+            $refreshedInvoice = $invoice->fresh(); // refreshOutstandingAndStatus mutates its own local $invoice->fresh() copy, not this outer $invoice -- re-fetch to see the saved changes
+
+            // Deliberately called here, AFTER outstanding_amount is
+            // recalculated -- an Observer on Payment::created would fire
+            // before this point in the method and bake the stale,
+            // pre-payment outstanding balance into the notification.
+            $this->invoiceObserver->notifyClientPortalUsers(
+                $refreshedInvoice,
+                new InvoiceEventNotification($refreshedInvoice, 'payment_received', [
+                    'amount' => number_format($amount, 2),
+                    'outstanding_amount' => number_format((float) $refreshedInvoice->outstanding_amount, 2),
+                ]),
+            );
 
             return $payment;
         });

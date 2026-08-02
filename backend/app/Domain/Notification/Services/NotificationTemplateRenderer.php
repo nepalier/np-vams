@@ -117,6 +117,26 @@ class NotificationTemplateRenderer
                 'body' => 'असाइनमेन्ट {{assignment_number}} को प्रतिवेदन प्रतिस्थापित गरिएको छ। टिप्पणी: {{remarks}}',
             ],
         ],
+        'invoice_issued' => [
+            'en' => [
+                'subject' => 'Invoice issued — {{invoice_number}}',
+                'body' => 'Invoice {{invoice_number}} for NRs. {{total_amount}} has been issued. It is due by {{due_date}}.',
+            ],
+            'ne' => [
+                'subject' => 'बिजक जारी — {{invoice_number}}',
+                'body' => 'बिजक {{invoice_number}} रु. {{total_amount}} जारी गरिएको छ। यो {{due_date}} सम्ममा तिर्नुपर्नेछ।',
+            ],
+        ],
+        'payment_received' => [
+            'en' => [
+                'subject' => 'Payment received — {{invoice_number}}',
+                'body' => 'A payment of NRs. {{amount}} has been recorded against invoice {{invoice_number}}. Outstanding balance: NRs. {{outstanding_amount}}.',
+            ],
+            'ne' => [
+                'subject' => 'भुक्तानी प्राप्त — {{invoice_number}}',
+                'body' => 'बिजक {{invoice_number}} विरुद्ध रु. {{amount}} भुक्तानी दर्ता गरिएको छ। बाँकी रकम: रु. {{outstanding_amount}}।',
+            ],
+        ],
     ];
 
     /**
