@@ -19,6 +19,7 @@ Route::get('/properties', fn () => Inertia::render('Properties/Index'));
 Route::get('/properties/{id}', fn (string $id) => Inertia::render('Properties/Show', ['id' => $id]));
 Route::get('/invoices', fn () => Inertia::render('Invoices/Index'));
 Route::get('/settings', fn () => Inertia::render('Settings/Index'));
+Route::get('/profile', fn () => Inertia::render('Profile/Index'));
 Route::get('/parties', fn () => Inertia::render('Parties/Index'));
 Route::get('/portal', fn () => Inertia::render('Portal/Dashboard'));
 Route::get('/portal/assignments', fn () => Inertia::render('Portal/Assignments'));

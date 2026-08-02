@@ -18,6 +18,7 @@ use App\Domain\Party\Http\Controllers\PropertyOwnerController;
 use App\Domain\Property\Http\Controllers\LandParcelCharacteristicsController;
 use App\Domain\Property\Http\Controllers\LandParcelController;
 use App\Domain\Property\Http\Controllers\PropertyController;
+use App\Domain\Professional\Http\Controllers\ProfessionalProfileController;
 use App\Domain\Settings\Http\Controllers\TenantSettingsController;
 use App\Domain\Report\Http\Controllers\QrVerificationController;
 use App\Domain\Report\Http\Controllers\ReportController;
@@ -59,6 +60,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/master-data/property-types', [MasterDataController::class, 'propertyTypes']);
         Route::get('/master-data/area-units', [MasterDataController::class, 'areaUnits']);
         Route::get('/master-data/districts', [MasterDataController::class, 'districts']);
+
+        Route::get('/professional-profile', [ProfessionalProfileController::class, 'show']);
+        Route::put('/professional-profile', [ProfessionalProfileController::class, 'update']);
+        Route::get('/professional-profiles', [ProfessionalProfileController::class, 'index']);
 
         Route::get('/borrowers', [BorrowerController::class, 'index']);
         Route::post('/borrowers', [BorrowerController::class, 'store']);
